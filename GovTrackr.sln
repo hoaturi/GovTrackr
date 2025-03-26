@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovTrackr.Application", "GovTrackr.Application\GovTrackr.Application.csproj", "{122768D3-F03B-47F4-BCCD-9D0EFFA3E2FE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1004AE5E-45C2-4882-BE3C-A6924CEB5039}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose-dev.yml = docker-compose-dev.yml
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovTrackr.Infrastructure", "GovTrackr.Infrastructure\GovTrackr.Infrastructure.csproj", "{3AA0BD79-5CD4-4D93-A626-CFD22BD36FB8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{122768D3-F03B-47F4-BCCD-9D0EFFA3E2FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{122768D3-F03B-47F4-BCCD-9D0EFFA3E2FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{122768D3-F03B-47F4-BCCD-9D0EFFA3E2FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{122768D3-F03B-47F4-BCCD-9D0EFFA3E2FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AA0BD79-5CD4-4D93-A626-CFD22BD36FB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AA0BD79-5CD4-4D93-A626-CFD22BD36FB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AA0BD79-5CD4-4D93-A626-CFD22BD36FB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AA0BD79-5CD4-4D93-A626-CFD22BD36FB8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
