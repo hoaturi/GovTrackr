@@ -11,7 +11,8 @@ public static class ServiceExtensions
         IConfiguration configuration)
     {
         services.AddConfigOptions(configuration)
-            .AddDatabaseServices();
+            .AddDatabaseService()
+            .AddMediatrService();
 
         return services;
     }
@@ -25,13 +26,20 @@ public static class ServiceExtensions
         return services;
     }
 
-    private static IServiceCollection AddDatabaseServices(this IServiceCollection services)
+    private static IServiceCollection AddDatabaseService(this IServiceCollection services)
     {
         services.AddDbContext<AppDbContext>((serviceProvider, options) =>
         {
             var dbOptions = serviceProvider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
             options.UseNpgsql(dbOptions.ConnectionString);
         });
+
+        return services;
+    }
+
+    private static IServiceCollection AddMediatrService(this IServiceCollection services)
+    {
+        services.AddMediatR(config => { config.RegisterServicesFromAssemblyContaining<Program>(); });
 
         return services;
     }
