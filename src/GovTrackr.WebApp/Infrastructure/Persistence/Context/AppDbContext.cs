@@ -1,10 +1,14 @@
 ﻿using GovTrackr.Application.Domain.Common;
+using GovTrackr.Application.Domain.PresidentialAction;
 using Microsoft.EntityFrameworkCore;
 
 namespace GovTrackr.Application.Infrastructure.Persistence.Context;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
+    public DbSet<PresidentialAction> PresidentialActions { get; set; }
+    public DbSet<PresidentialActionTranslation> PresidentialActionTranslations { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
