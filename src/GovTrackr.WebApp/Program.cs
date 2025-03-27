@@ -1,4 +1,4 @@
-using GovTrackr.Application.Extensions;
+using GovTrackr.Application.Configurations.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
