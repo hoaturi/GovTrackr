@@ -7,6 +7,11 @@ using Xunit;
 
 namespace GovTrackr.WebApp.Tests;
 
+[CollectionDefinition("Database")]
+public class DatabaseCollection : ICollectionFixture<DatabaseFixture>
+{
+}
+
 public class DatabaseFixture : IAsyncLifetime
 {
     private readonly PostgreSqlContainer _postgreSqlContainer = new PostgreSqlBuilder()
@@ -19,8 +24,7 @@ public class DatabaseFixture : IAsyncLifetime
         .Build();
 
     public AppDbContext DbContext { get; private set; }
-    public string ConnectionString { get; private set; }
-
+    private string ConnectionString { get; set; }
 
     public async Task InitializeAsync()
     {
