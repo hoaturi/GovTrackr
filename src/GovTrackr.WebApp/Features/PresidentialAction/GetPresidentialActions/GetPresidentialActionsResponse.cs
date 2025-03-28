@@ -12,7 +12,7 @@ public record GetPresidentialActionsItem(
     Guid Id,
     string Title,
     string Summary,
-    string OriginalTitle,
+    string SourceTitle,
     string SourceUrl,
     DateTime PublishedAt,
     DocumentSubCategory SubCategory
