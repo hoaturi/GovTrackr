@@ -16,6 +16,9 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+# HTTP Requests
+*.http
+
 # Migrations
 Migrations/
 
