@@ -11,6 +11,13 @@ public class DocumentClassification : BaseEntity
     public required DocumentType Type { get; set; }
 }
 
+public enum DocumentClassificationType
+{
+    ExecutiveOrder = 1,
+    Memoranda = 2,
+    Proclamation = 3
+}
+
 public enum DocumentType
 {
     PresidentialAction = 1

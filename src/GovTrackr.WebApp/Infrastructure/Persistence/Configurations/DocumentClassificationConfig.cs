@@ -1,6 +1,7 @@
 ﻿using GovTrackr.Application.Domain.PresidentialAction;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using DocumentType = GovTrackr.Application.Domain.PresidentialAction.DocumentType;
 
 namespace GovTrackr.Application.Infrastructure.Persistence.Configurations;
 
@@ -31,21 +32,21 @@ public class DocumentClassificationConfig : IEntityTypeConfiguration<DocumentCla
         builder.HasData(
             new DocumentClassification
             {
-                Id = 1,
+                Id = (int)DocumentClassificationType.ExecutiveOrder,
                 Name = "Executive Order",
                 Slug = "executive-order",
                 Type = DocumentType.PresidentialAction
             },
             new DocumentClassification
             {
-                Id = 2,
-                Name = "Presidential Memoranda",
-                Slug = "presidential-memoranda",
+                Id = (int)DocumentClassificationType.Memoranda,
+                Name = "Memoranda",
+                Slug = "memoranda",
                 Type = DocumentType.PresidentialAction
             },
             new DocumentClassification
             {
-                Id = 3,
+                Id = (int)DocumentClassificationType.Proclamation,
                 Name = "Proclamation",
                 Slug = "proclamation",
                 Type = DocumentType.PresidentialAction
