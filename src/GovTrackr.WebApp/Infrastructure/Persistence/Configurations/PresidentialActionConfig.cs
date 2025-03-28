@@ -25,9 +25,9 @@ public class PresidentialActionConfig : IEntityTypeConfiguration<PresidentialAct
         builder.Property(p => p.TranslationStatus)
             .IsRequired();
 
-        builder.HasOne(p => p.Classification)
+        builder.HasOne(p => p.SubCategory)
             .WithMany()
-            .HasForeignKey(p => p.ClassificationId)
+            .HasForeignKey(p => p.SubCategoryId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(p => p.PublishedAt);

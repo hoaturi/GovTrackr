@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GovTrackr.Application.Domain.PresidentialAction;
 using GovTrackr.Application.Features.PresidentialAction.GetPresidentialActions;
 using Shouldly;
 using Xunit;
@@ -34,16 +35,21 @@ public class GetPresidentialActionsQueryHandlerTests : IClassFixture<DatabaseFix
         var testDataHelper = new TestDataHelper(_fixture.DbContext);
 
         // Create test data for each classification type using the same date range
-        await testDataHelper.CreatePresidentialActionsWithDateAsync(ExecutiveOrderCount, 1, _dateFrom, _dateTo);
-        await testDataHelper.CreatePresidentialActionsWithDateAsync(ProclamationCount, 2, _dateFrom, _dateTo);
-        await testDataHelper.CreatePresidentialActionsWithDateAsync(MemorandaCount, 3, _dateFrom, _dateTo);
+        await testDataHelper.CreatePresidentialActionsWithDateAsync(ExecutiveOrderCount,
+            DocumentSubCategoryType.ExecutiveOrder, _dateFrom, _dateTo);
+
+        await testDataHelper.CreatePresidentialActionsWithDateAsync(ProclamationCount,
+            DocumentSubCategoryType.Proclamation, _dateFrom, _dateTo);
+
+        await testDataHelper.CreatePresidentialActionsWithDateAsync(MemorandaCount, DocumentSubCategoryType.Memoranda,
+            _dateFrom, _dateTo);
     }
 
     [Theory]
     [InlineData(null, null, null, TotalActionCount)]
     [InlineData("executive-order", null, null, ExecutiveOrderCount)]
     [InlineData("proclamation", null, null, ProclamationCount)]
-    [InlineData("presidential-memoranda", null, null, MemorandaCount)]
+    [InlineData("memoranda", null, null, MemorandaCount)]
     public async Task Handle_WithCategoryFilter_ReturnsMatchingActions(
         string category, DateTime? fromDate, DateTime? toDate, int expectedCount)
     {
@@ -59,7 +65,7 @@ public class GetPresidentialActionsQueryHandlerTests : IClassFixture<DatabaseFix
 
         if (category != null)
             foreach (var item in result.Value.Items)
-                item.Classification.Slug.ShouldBe(category);
+                item.SubCategory.Slug.ShouldBe(category);
     }
 
     [Fact]
@@ -128,7 +134,7 @@ public class GetPresidentialActionsQueryHandlerTests : IClassFixture<DatabaseFix
 
         foreach (var item in result.Value.Items)
         {
-            item.Classification.Slug.ShouldBe("executive-order");
+            item.SubCategory.Slug.ShouldBe("executive-order");
             item.PublishedAt.ShouldBeGreaterThanOrEqualTo(_dateFrom);
             item.PublishedAt.ShouldBeLessThanOrEqualTo(_dateTo);
         }

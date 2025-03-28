@@ -8,7 +8,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<PresidentialAction> PresidentialActions { get; set; }
     public DbSet<PresidentialActionTranslation> PresidentialActionTranslations { get; set; }
-    public DbSet<DocumentClassification> DocumentClassifications { get; set; }
+    public DbSet<DocumentSubCategory> DocumentSubCategories { get; set; }
+    public DbSet<DocumentCategory> DocumentCategories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

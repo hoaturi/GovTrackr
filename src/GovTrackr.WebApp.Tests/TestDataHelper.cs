@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
 using GovTrackr.Application.Domain.PresidentialAction;
@@ -13,32 +11,25 @@ namespace GovTrackr.WebApp.Tests;
 /// </summary>
 public class TestDataHelper(AppDbContext dbContext)
 {
-    public async Task<List<Guid>> CreatePresidentialActionsWithDateAsync(int count, int classificationType,
+    public async Task CreatePresidentialActionsWithDateAsync(int count,
+        DocumentSubCategoryType subCategoryType,
         DateTime fromDate, DateTime toDate)
     {
-        var titlePrefix = classificationType switch
-        {
-            1 => "Executive Order",
-            2 => "Proclamation",
-            3 => "Presidential Memorandum",
-            _ => throw new ArgumentOutOfRangeException(nameof(classificationType), classificationType, null)
-        };
-
         var faker = new Faker<PresidentialAction>()
             .RuleFor(a => a.Id, f => Guid.NewGuid())
-            .RuleFor(a => a.Title, f => $"{titlePrefix}: {f.Lorem.Sentence(5)}")
+            .RuleFor(a => a.Title, f => f.Lorem.Sentence(5))
             .RuleFor(a => a.Content, f => f.Lorem.Paragraphs(2))
             .RuleFor(a => a.SourceUrl, f => f.Internet.Url())
             .RuleFor(a => a.PublishedAt, f => f.Date.Between(fromDate, toDate))
-            .RuleFor(a => a.ClassificationId, classificationType)
+            .RuleFor(a => a.SubCategoryId, (int)subCategoryType)
             .RuleFor(a => a.TranslationStatus, TranslationStatus.Completed);
 
         var actions = faker.Generate(count);
-        var classification = await dbContext.DocumentClassifications.FindAsync(classificationType);
+        var classification = await dbContext.DocumentSubCategories.FindAsync((int)subCategoryType);
 
         foreach (var action in actions)
         {
-            action.Classification = classification;
+            action.SubCategory = classification!;
 
             var translation = new PresidentialActionTranslation
             {
@@ -55,7 +46,5 @@ public class TestDataHelper(AppDbContext dbContext)
         }
 
         await dbContext.SaveChangesAsync();
-
-        return actions.Select(a => a.Id).ToList();
     }
 }

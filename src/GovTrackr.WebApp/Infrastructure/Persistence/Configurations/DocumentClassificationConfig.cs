@@ -1,13 +1,13 @@
-﻿using GovTrackr.Application.Domain.PresidentialAction;
+﻿using GovTrackr.Application.Domain.Common;
+using GovTrackr.Application.Domain.PresidentialAction;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using DocumentType = GovTrackr.Application.Domain.PresidentialAction.DocumentType;
 
 namespace GovTrackr.Application.Infrastructure.Persistence.Configurations;
 
-public class DocumentClassificationConfig : IEntityTypeConfiguration<DocumentClassification>
+public class DocumentClassificationConfig : IEntityTypeConfiguration<DocumentSubCategory>
 {
-    public void Configure(EntityTypeBuilder<DocumentClassification> builder)
+    public void Configure(EntityTypeBuilder<DocumentSubCategory> builder)
     {
         builder.HasKey(p => p.Id);
 
@@ -18,38 +18,38 @@ public class DocumentClassificationConfig : IEntityTypeConfiguration<DocumentCla
             .IsRequired();
 
         // Make Name and Slug unique within the same document type
-        builder.HasIndex(p => new { p.Name, p.Type })
+        builder.HasIndex(p => new { p.Name, p.CategoryId })
             .IsUnique();
 
-        builder.HasIndex(p => new { p.Slug, p.Type })
+        builder.HasIndex(p => new { p.Slug, p.CategoryId })
             .IsUnique();
 
-        builder.Property(p => p.Type);
-
-        builder.HasIndex(p => p.Type);
-
+        builder.HasOne(p => p.Category)
+            .WithMany()
+            .HasForeignKey(p => p.CategoryId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasData(
-            new DocumentClassification
+            new DocumentSubCategory
             {
-                Id = (int)DocumentClassificationType.ExecutiveOrder,
+                Id = (int)DocumentSubCategoryType.ExecutiveOrder,
                 Name = "Executive Order",
                 Slug = "executive-order",
-                Type = DocumentType.PresidentialAction
+                CategoryId = (int)DocumentCategoryType.PresidentialAction
             },
-            new DocumentClassification
+            new DocumentSubCategory
             {
-                Id = (int)DocumentClassificationType.Memoranda,
+                Id = (int)DocumentSubCategoryType.Memoranda,
                 Name = "Memoranda",
                 Slug = "memoranda",
-                Type = DocumentType.PresidentialAction
+                CategoryId = (int)DocumentCategoryType.PresidentialAction
             },
-            new DocumentClassification
+            new DocumentSubCategory
             {
-                Id = (int)DocumentClassificationType.Proclamation,
+                Id = (int)DocumentSubCategoryType.Proclamation,
                 Name = "Proclamation",
                 Slug = "proclamation",
-                Type = DocumentType.PresidentialAction
+                CategoryId = (int)DocumentCategoryType.PresidentialAction
             }
         );
     }
