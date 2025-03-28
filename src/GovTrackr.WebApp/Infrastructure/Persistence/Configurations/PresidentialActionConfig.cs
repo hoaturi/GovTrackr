@@ -22,18 +22,15 @@ public class PresidentialActionConfig : IEntityTypeConfiguration<PresidentialAct
         builder.Property(p => p.PublishedAt)
             .IsRequired();
 
-        builder.Property(p => p.Category)
-            .IsRequired();
-
         builder.Property(p => p.TranslationStatus)
             .IsRequired();
 
-        builder.HasOne(p => p.Translation)
-            .WithOne(t => t.PresidentialAction)
-            .HasForeignKey<PresidentialActionTranslation>(t => t.PresidentialActionId);
+        builder.HasOne(p => p.Classification)
+            .WithMany()
+            .HasForeignKey(p => p.ClassificationId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(p => p.PublishedAt);
-        builder.HasIndex(p => p.Category);
         builder.HasIndex(p => p.TranslationStatus);
     }
 }

@@ -5,29 +5,14 @@ namespace GovTrackr.Application.Domain.PresidentialAction;
 public class PresidentialAction : BaseEntity
 {
     public Guid Id { get; set; }
-
+    public int ClassificationId { get; set; }
     public required string Title { get; set; }
-
     public required string Content { get; set; }
-
     public required string SourceUrl { get; set; }
-
     public DateTime PublishedAt { get; set; }
-
-    public PresidentialActionCategory Category { get; set; }
-
+    public DocumentClassification Classification { get; set; }
     public TranslationStatus TranslationStatus { get; set; }
-
     public PresidentialActionTranslation? Translation { get; set; }
-}
-
-public enum PresidentialActionCategory
-{
-    ExecutiveOrder = 1,
-    Proclamation = 2,
-    Memorandum = 3,
-    ExecutiveAgreement = 4,
-    Determination = 5
 }
 
 public enum TranslationStatus
