@@ -24,13 +24,13 @@ public abstract class ApiControllerBase : ControllerBase
         if (!result.Errors.Any()) return StatusCode(StatusCodes.Status500InternalServerError);
 
         var error = result.Errors.First();
+        error.Metadata.TryGetValue("Code", out var code);
 
         var statusCode = GetStatusCodeForError(error);
-        var errorResponse = new ErrorResponse(statusCode, error.Message);
+        var errorResponse = new ErrorResponse(statusCode, error.Message, code?.ToString());
 
         return StatusCode(statusCode, errorResponse);
     }
-
 
     private static int GetStatusCodeForError(IError error)
     {
