@@ -12,7 +12,7 @@ namespace GovTrackr.WebApp.Tests;
 /// </summary>
 public class TestDataHelper(AppDbContext dbContext)
 {
-    public async Task CreatePresidentialActionsWithDateAsync(int count,
+    public async Task CreatePresidentialActionsAsync(int count,
         DocumentSubCategoryType subCategoryType,
         DateTime fromDate, DateTime toDate)
     {

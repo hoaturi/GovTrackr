@@ -19,8 +19,8 @@ public class GetPresidentialActionsQueryHandlerTests : IAsyncLifetime
     private const int ProclamationCount = 1;
     private const int MemorandaCount = 1;
     private const int TotalActionCount = ExecutiveOrderCount + ProclamationCount + MemorandaCount;
-    private readonly DateTime _dateFrom = DateTime.SpecifyKind(new DateTime(2023, 1, 1), DateTimeKind.Utc);
-    private readonly DateTime _dateTo = DateTime.SpecifyKind(new DateTime(2023, 12, 31), DateTimeKind.Utc);
+    private readonly DateTime _dateFrom = DateTime.SpecifyKind(new DateTime(2024, 1, 1), DateTimeKind.Utc);
+    private readonly DateTime _dateTo = DateTime.SpecifyKind(new DateTime(2024, 12, 31), DateTimeKind.Utc);
     private readonly AppDbContext _dbContext;
     private readonly GetPresidentialActionsQueryHandler _handler;
     private readonly IDbContextTransaction _transaction;
@@ -47,13 +47,13 @@ public class GetPresidentialActionsQueryHandlerTests : IAsyncLifetime
     {
         var testDataHelper = new TestDataHelper(_dbContext);
 
-        await testDataHelper.CreatePresidentialActionsWithDateAsync(ExecutiveOrderCount, DocumentSubCategoryType.ExecutiveOrder,
+        await testDataHelper.CreatePresidentialActionsAsync(ExecutiveOrderCount, DocumentSubCategoryType.ExecutiveOrder,
             _dateFrom, _dateTo);
 
-        await testDataHelper.CreatePresidentialActionsWithDateAsync(ProclamationCount, DocumentSubCategoryType.Proclamation,
+        await testDataHelper.CreatePresidentialActionsAsync(ProclamationCount, DocumentSubCategoryType.Proclamation,
             _dateFrom, _dateTo);
 
-        await testDataHelper.CreatePresidentialActionsWithDateAsync(MemorandaCount, DocumentSubCategoryType.Memoranda,
+        await testDataHelper.CreatePresidentialActionsAsync(MemorandaCount, DocumentSubCategoryType.Memoranda,
             _dateFrom, _dateTo);
     }
 
