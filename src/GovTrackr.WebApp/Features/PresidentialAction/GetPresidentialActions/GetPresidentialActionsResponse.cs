@@ -3,7 +3,9 @@
 namespace GovTrackr.Application.Features.PresidentialAction.GetPresidentialActions;
 
 public record GetPresidentialActionsResponse(
-    List<GetPresidentialActionsItem> Items
+    List<GetPresidentialActionsItem> Items,
+    int TotalCount,
+    int Page
 );
 
 public record GetPresidentialActionsItem(

@@ -30,6 +30,8 @@ public class GetPresidentialActionsQueryHandler(AppDbContext dbContext)
             query = query.Where(a => a.PresidentialAction.PublishedAt <= toDateUtc);
         }
 
+        var totalCount = await query.CountAsync(cancellationToken);
+
         var translatedActions = await query
             .OrderByDescending(t => t.PresidentialAction.PublishedAt)
             .Select(t => new GetPresidentialActionsItem(
@@ -44,6 +46,6 @@ public class GetPresidentialActionsQueryHandler(AppDbContext dbContext)
             .Skip((request.Page - 1) * 20)
             .ToListAsync(cancellationToken);
 
-        return Result.Ok(new GetPresidentialActionsResponse(translatedActions));
+        return Result.Ok(new GetPresidentialActionsResponse(translatedActions, totalCount, request.Page));
     }
 }
