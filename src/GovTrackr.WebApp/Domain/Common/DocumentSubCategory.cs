@@ -1,6 +1,4 @@
-﻿using GovTrackr.Application.Domain.Common;
-
-namespace GovTrackr.Application.Domain.PresidentialAction;
+﻿namespace GovTrackr.Application.Domain.Common;
 
 public class DocumentSubCategory : BaseEntity
 {

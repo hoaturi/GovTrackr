@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Bogus;
+using GovTrackr.Application.Domain.Common;
 using GovTrackr.Application.Domain.PresidentialAction;
 using GovTrackr.Application.Infrastructure.Persistence.Context;
 
