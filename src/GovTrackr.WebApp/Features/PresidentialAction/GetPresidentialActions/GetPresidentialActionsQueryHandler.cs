@@ -5,50 +5,43 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GovTrackr.Application.Features.PresidentialAction.GetPresidentialActions;
 
-public class GetPresidentialActionsQueryHandler(AppDbContext dbContext)
-    : IRequestHandler<GetPresidentialActionsQuery, Result<GetPresidentialActionsResponse>>
+public class
+    GetPresidentialActionsQueryHandler(AppDbContext dbContext) : IRequestHandler<GetPresidentialActionsQuery,
+    Result<GetPresidentialActionsResponse>>
 {
     private const int PageSize = 20;
 
     public async Task<Result<GetPresidentialActionsResponse>> Handle(GetPresidentialActionsQuery request,
         CancellationToken cancellationToken)
     {
-        var baseQuery = dbContext.PresidentialActionTranslations
-            .AsNoTracking();
+        var query = dbContext.PresidentialActionTranslations.AsNoTracking();
 
         if (request.Category is not null)
-            baseQuery = baseQuery.Where(a => a.PresidentialAction.SubCategory.Slug == request.Category);
+            query = query.Where(a => a.PresidentialAction.SubCategory.Slug == request.Category);
 
         if (request.FromDate.HasValue)
-        {
-            var fromDateUtc = DateTime.SpecifyKind(request.FromDate.Value, DateTimeKind.Utc);
-            baseQuery = baseQuery.Where(a => a.PresidentialAction.PublishedAt >= fromDateUtc);
-        }
+            query = query.Where(a => a.PresidentialAction.PublishedAt >= request.FromDate.Value.ToUniversalTime());
 
         if (request.ToDate.HasValue)
-        {
-            var toDateUtc = DateTime.SpecifyKind(request.ToDate.Value, DateTimeKind.Utc);
-            baseQuery = baseQuery.Where(a => a.PresidentialAction.PublishedAt <= toDateUtc);
-        }
+            query = query.Where(a => a.PresidentialAction.PublishedAt <= request.ToDate.Value.ToUniversalTime());
 
-        var orderedQuery = baseQuery.OrderByDescending(t => t.PresidentialAction.PublishedAt);
+        var totalCount = await query.CountAsync(cancellationToken);
 
-        var totalCount = await orderedQuery.CountAsync(cancellationToken);
-
-        var translatedActions = await orderedQuery
+        var actions = await query
+            .OrderByDescending(a => a.PresidentialAction.PublishedAt)
             .Skip((request.Page - 1) * PageSize)
             .Take(PageSize)
-            .Select(t => new GetPresidentialActionsItem(
-                t.Id,
-                t.Title,
-                t.Summary,
-                t.PresidentialAction.Title,
-                t.PresidentialAction.SourceUrl,
-                t.PresidentialAction.PublishedAt,
-                t.PresidentialAction.SubCategory
+            .Select(a => new GetPresidentialActionsItem(
+                a.Id,
+                a.Title,
+                a.Summary,
+                a.PresidentialAction.Title,
+                a.PresidentialAction.SourceUrl,
+                a.PresidentialAction.PublishedAt,
+                a.PresidentialAction.SubCategory
             ))
             .ToListAsync(cancellationToken);
 
-        return Result.Ok(new GetPresidentialActionsResponse(translatedActions, totalCount, request.Page));
+        return Result.Ok(new GetPresidentialActionsResponse(actions, totalCount, request.Page));
     }
 }
