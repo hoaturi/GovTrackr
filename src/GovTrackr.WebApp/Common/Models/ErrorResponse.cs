@@ -1,3 +1,3 @@
-﻿namespace GovTrackr.Application.Common;
+﻿namespace GovTrackr.Application.Common.Models;
 
 public record ErrorResponse(int StatusCode, string Code);

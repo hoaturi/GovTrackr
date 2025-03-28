@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+using GovTrackr.Application.Common.Models;
 using GovTrackr.Application.Common.Models.Errors;
 using Microsoft.AspNetCore.Mvc;
 
