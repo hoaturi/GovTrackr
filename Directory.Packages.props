@@ -1,0 +1,27 @@
+﻿<Project>
+    <PropertyGroup>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageVersion  Include="FluentResults" Version="3.16.0"/>
+        <PackageVersion  Include="MediatR" Version="12.4.1"/>
+        <PackageVersion  Include="Microsoft.AspNetCore.OpenApi" Version="9.0.3"/>
+        <PackageVersion  Include="Microsoft.EntityFrameworkCore" Version="9.0.3"/>
+        <PackageVersion  Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.3">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageVersion >
+        <PackageVersion  Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4"/>
+        <PackageVersion Include="Bogus" Version="35.6.2"/>
+        <PackageVersion Include="JetBrains.Annotations" Version="2025.1.0-eap1"/>
+        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.13.0"/>
+        <PackageVersion Include="Moq" Version="4.20.72"/>
+        <PackageVersion Include="Shouldly" Version="4.3.0"/>
+        <PackageVersion Include="Testcontainers.PostgreSql" Version="4.3.0"/>
+        <PackageVersion Include="xunit" Version="2.9.3"/>
+        <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.2">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageVersion>
+    </ItemGroup>
+</Project>
