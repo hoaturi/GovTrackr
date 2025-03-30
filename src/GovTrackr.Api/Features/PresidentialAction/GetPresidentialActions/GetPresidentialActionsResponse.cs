@@ -1,6 +1,4 @@
-﻿using Shared.Domain.Common;
-
-namespace GovTrackr.Application.Features.PresidentialAction.GetPresidentialActions;
+﻿namespace GovTrackr.Application.Features.PresidentialAction.GetPresidentialActions;
 
 public record GetPresidentialActionsResponse(
     List<GetPresidentialActionsItem> Items,
@@ -15,5 +13,5 @@ public record GetPresidentialActionsItem(
     string SourceTitle,
     string SourceUrl,
     DateTime PublishedAt,
-    DocumentSubCategory SubCategory
+    string SubCategory
 );

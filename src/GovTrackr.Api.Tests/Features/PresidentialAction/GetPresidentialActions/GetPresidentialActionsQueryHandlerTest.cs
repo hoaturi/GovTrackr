@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,7 +9,6 @@ using Shared.Domain.Common;
 using Shared.Infrastructure.Persistence.Context;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace GovTrackr.Api.Tests.Features.PresidentialAction.GetPresidentialActions;
 
@@ -25,7 +25,7 @@ public class GetPresidentialActionsQueryHandlerTests : IAsyncLifetime
     private readonly GetPresidentialActionsQueryHandler _handler;
     private readonly IDbContextTransaction _transaction;
 
-    public GetPresidentialActionsQueryHandlerTests(DatabaseFixture fixture, ITestOutputHelper testOutputHelper)
+    public GetPresidentialActionsQueryHandlerTests(DatabaseFixture fixture)
     {
         _dbContext = fixture.DbContext;
         _transaction = _dbContext.Database.BeginTransaction();
@@ -75,9 +75,14 @@ public class GetPresidentialActionsQueryHandlerTests : IAsyncLifetime
         result.IsSuccess.ShouldBeTrue();
         result.Value.Items.Count.ShouldBeGreaterThanOrEqualTo(expectedCount);
 
-        if (category != null)
+        if (category is not null)
+        {
+            var textInfo = new CultureInfo("en-US", false).TextInfo;
+            var expectedCategory = textInfo.ToTitleCase(category.Replace("-", " ").ToLower());
+
             foreach (var item in result.Value.Items)
-                item.SubCategory.Slug.ShouldBe(category);
+                item.SubCategory.ShouldBe(expectedCategory);
+        }
     }
 
     [Fact]
@@ -142,7 +147,7 @@ public class GetPresidentialActionsQueryHandlerTests : IAsyncLifetime
 
         foreach (var item in result.Value.Items)
         {
-            item.SubCategory.Slug.ShouldBe("executive-order");
+            item.SubCategory.ShouldBe("Executive Order");
             item.PublishedAt.ShouldBeGreaterThanOrEqualTo(_dateFrom);
             item.PublishedAt.ShouldBeLessThanOrEqualTo(_dateTo);
         }

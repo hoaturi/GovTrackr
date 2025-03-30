@@ -1,6 +1,7 @@
 ﻿using FluentResults;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Shared.Domain.PresidentialAction;
 using Shared.Infrastructure.Persistence.Context;
 
 namespace GovTrackr.Application.Features.PresidentialAction.GetPresidentialActions;
@@ -14,9 +15,9 @@ public class
     public async Task<Result<GetPresidentialActionsResponse>> Handle(GetPresidentialActionsQuery request,
         CancellationToken cancellationToken)
     {
-        var query = dbContext.PresidentialActionTranslations.AsNoTracking();
+        IQueryable<PresidentialActionTranslation> query = dbContext.PresidentialActionTranslations;
 
-        if (request.Category is not null)
+        if (request.Category is not null && request.Category != string.Empty)
             query = query.Where(a => a.PresidentialAction.SubCategory.Slug == request.Category);
 
         if (request.FromDate.HasValue)
@@ -38,7 +39,7 @@ public class
                 a.PresidentialAction.Title,
                 a.PresidentialAction.SourceUrl,
                 a.PresidentialAction.PublishedAt,
-                a.PresidentialAction.SubCategory
+                a.PresidentialAction.SubCategory.Name
             ))
             .ToListAsync(cancellationToken);
 
