@@ -11,7 +11,7 @@ public static class ServiceExtensions
         IConfiguration configuration)
     {
         services.AddConfigOptions(configuration)
-            // .AddDatabaseService()
+            .AddDatabaseService()
             .AddMediatrService();
 
         return services;
@@ -19,8 +19,8 @@ public static class ServiceExtensions
 
     private static IServiceCollection AddConfigOptions(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddOptionsWithValidateOnStart<DatabaseOptions>()
-            .Bind(configuration.GetSection(DatabaseOptions.SectionName))
+        services.AddOptionsWithValidateOnStart<ConnectionStringsOptions>()
+            .Bind(configuration.GetSection(ConnectionStringsOptions.SectionName))
             .ValidateDataAnnotations();
 
         return services;
@@ -30,8 +30,8 @@ public static class ServiceExtensions
     {
         services.AddDbContext<AppDbContext>((serviceProvider, options) =>
         {
-            var dbOptions = serviceProvider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
-            options.UseNpgsql(dbOptions.ConnectionString);
+            var dbOptions = serviceProvider.GetRequiredService<IOptions<ConnectionStringsOptions>>().Value;
+            options.UseNpgsql(dbOptions.GovTrackrDb);
         });
 
         return services;

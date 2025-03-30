@@ -18,6 +18,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\GovTrackr.Api\GovTrackr.Api.csproj"/>
+        <ProjectReference Include="..\GovTrackr.MigrationService\GovTrackr.MigrationService.csproj"/>
     </ItemGroup>
 
 </Project>

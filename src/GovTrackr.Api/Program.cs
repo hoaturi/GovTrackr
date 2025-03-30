@@ -1,12 +1,9 @@
 using GovTrackr.Application.Configurations.Extensions;
 using GovTrackr.ServiceDefaults;
-using Shared.Infrastructure.Persistence.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
-
-builder.AddNpgsqlDbContext<AppDbContext>("govtrackr-db");
 
 builder.Services.AddAppServices(builder.Configuration);
 
