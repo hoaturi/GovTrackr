@@ -2,7 +2,7 @@
 
 namespace GovTrackr.Application.Configurations.Options;
 
-public class ConnectionStringsOptions
+internal class ConnectionStringsOptions
 {
     public const string SectionName = "ConnectionStrings";
 

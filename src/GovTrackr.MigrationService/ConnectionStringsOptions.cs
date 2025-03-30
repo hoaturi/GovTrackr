@@ -2,7 +2,7 @@
 
 namespace GovTrackr.MigrationService;
 
-public class ConnectionStringsOptions
+internal class ConnectionStringsOptions
 {
     public const string SectionName = "ConnectionStrings";
 
