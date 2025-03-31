@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>dotnet-GovTrackr.ScraperService-fa7f20aa-7220-4e15-a5a3-3baeafe012e9</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Hosting"/>
+        <PackageReference Include="MassTransit.Azure.ServiceBus.Core"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\GovTrackr.ServiceDefaults\GovTrackr.ServiceDefaults.csproj"/>
+        <ProjectReference Include="..\GovTrackr.Shared\GovTrackr.Shared.csproj"/>
+    </ItemGroup>
+</Project>
