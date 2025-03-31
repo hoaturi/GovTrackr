@@ -7,12 +7,12 @@ using Shared.Infrastructure.Persistence.Context;
 
 namespace GovTrackr.MigrationService;
 
-public class DbInitializer(
+internal class DbInitializer(
     IServiceProvider serviceProvider,
     IHostApplicationLifetime hostApplicationLifetime
 ) : BackgroundService
 {
-    public const string ActivitySourceName = "Migrations";
+    internal const string ActivitySourceName = "Migrations";
     private static readonly ActivitySource ActivitySource = new(ActivitySourceName);
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)

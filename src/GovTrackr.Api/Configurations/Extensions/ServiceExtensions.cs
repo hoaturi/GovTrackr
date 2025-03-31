@@ -5,9 +5,9 @@ using Shared.Infrastructure.Persistence.Context;
 
 namespace GovTrackr.Application.Configurations.Extensions;
 
-public static class ServiceExtensions
+internal static class ServiceExtensions
 {
-    public static IServiceCollection AddAppServices(this IServiceCollection services,
+    internal static IServiceCollection AddAppServices(this IServiceCollection services,
         IConfiguration configuration)
     {
         services.AddConfigOptions(configuration)

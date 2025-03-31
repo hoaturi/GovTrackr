@@ -4,7 +4,7 @@ namespace GovTrackr.MigrationService;
 
 internal class ConnectionStringsOptions
 {
-    public const string SectionName = "ConnectionStrings";
+    internal const string SectionName = "ConnectionStrings";
 
-    [Required] public string GovTrackrDb { get; set; } = null!;
+    [Required] public string GovTrackrDb { get; init; } = null!;
 }
