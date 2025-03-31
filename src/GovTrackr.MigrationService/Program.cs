@@ -5,12 +5,8 @@ using Microsoft.Extensions.Options;
 using Shared.Infrastructure.Persistence.Context;
 
 var builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddHostedService<DbInitializer>();
 
 builder.AddServiceDefaults();
-
-builder.Services.AddOpenTelemetry()
-    .WithTracing(tracing => tracing.AddSource(DbInitializer.ActivitySourceName));
 
 builder.Services.AddOptionsWithValidateOnStart<ConnectionStringsOptions>()
     .Bind(builder.Configuration.GetSection(ConnectionStringsOptions.SectionName))
@@ -21,6 +17,8 @@ builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
     var dbOptions = serviceProvider.GetRequiredService<IOptions<ConnectionStringsOptions>>().Value;
     options.UseNpgsql(dbOptions.GovTrackrDb);
 });
+
+builder.Services.AddHostedService<DbInitializer>();
 
 var host = builder.Build();
 
