@@ -4,7 +4,7 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <UserSecretsId>dotnet-GovTrackr.ScraperService-fa7f20aa-7220-4e15-a5a3-3baeafe012e9</UserSecretsId>
+        <UserSecretsId>7811fa03-495f-41fa-9429-a95edfe7fd98</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
