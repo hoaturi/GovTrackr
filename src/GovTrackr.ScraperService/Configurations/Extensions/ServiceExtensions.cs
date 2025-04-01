@@ -31,8 +31,8 @@ internal static class ServiceExtensions
 
     private static IServiceCollection AddConfigOptions(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddOptionsWithValidateOnStart<ConnectionStringsOptions>()
-            .Bind(configuration.GetSection(ConnectionStringsOptions.SectionName))
+        services.AddOptionsWithValidateOnStart<ConnectionStringsOption>()
+            .Bind(configuration.GetSection(ConnectionStringsOption.SectionName))
             .ValidateDataAnnotations();
 
         return services;
@@ -43,7 +43,7 @@ internal static class ServiceExtensions
         services.AddDbContext<AppDbContext>((serviceProvider, options) =>
         {
             var connectionStringsOptions =
-                serviceProvider.GetRequiredService<IOptions<ConnectionStringsOptions>>().Value;
+                serviceProvider.GetRequiredService<IOptions<ConnectionStringsOption>>().Value;
             options.UseNpgsql(connectionStringsOptions.GovTrackrDb);
         });
 
@@ -58,7 +58,7 @@ internal static class ServiceExtensions
 
             config.UsingAzureServiceBus((context, cfg) =>
             {
-                var connectionStringsOptions = context.GetRequiredService<IOptions<ConnectionStringsOptions>>().Value;
+                var connectionStringsOptions = context.GetRequiredService<IOptions<ConnectionStringsOption>>().Value;
                 cfg.Host(connectionStringsOptions.AzureServiceBus);
                 cfg.ConfigureEndpoints(context);
             });

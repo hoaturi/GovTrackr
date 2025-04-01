@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GovTrackr.Application.Configurations.Options;
+namespace GovTrackr.MigrationService;
 
-internal class ConnectionStringsOptions
+internal class ConnectionStringsOption
 {
     internal const string SectionName = "ConnectionStrings";
 

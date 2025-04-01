@@ -8,13 +8,13 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.Services.AddOptionsWithValidateOnStart<ConnectionStringsOptions>()
-    .Bind(builder.Configuration.GetSection(ConnectionStringsOptions.SectionName))
+builder.Services.AddOptionsWithValidateOnStart<ConnectionStringsOption>()
+    .Bind(builder.Configuration.GetSection(ConnectionStringsOption.SectionName))
     .ValidateDataAnnotations();
 
 builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
 {
-    var dbOptions = serviceProvider.GetRequiredService<IOptions<ConnectionStringsOptions>>().Value;
+    var dbOptions = serviceProvider.GetRequiredService<IOptions<ConnectionStringsOption>>().Value;
     options.UseNpgsql(dbOptions.GovTrackrDb);
 });
 
