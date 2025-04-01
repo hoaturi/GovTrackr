@@ -10,7 +10,7 @@ public class PresidentialAction : BaseEntity
     public required string Content { get; set; }
     public required string SourceUrl { get; set; }
     public DateTime PublishedAt { get; set; }
-    public required DocumentSubCategory SubCategory { get; set; }
+    public DocumentSubCategory SubCategory { get; set; } = null!;
     public TranslationStatus TranslationStatus { get; set; }
     public PresidentialActionTranslation? Translation { get; set; }
 }
