@@ -1,8 +1,8 @@
 ﻿using Shared.MessageContracts;
 
-namespace GovTrackr.ScraperService.Abstractions.Scraping;
+namespace GovTrackr.ScraperService.Contracts.Scraping;
 
-internal interface IScrapingService
+internal interface IDocumentScrapingService
 {
     Task ScrapeAsync(DocumentDiscovered documentDiscovered, CancellationToken cancellationToken);
 }

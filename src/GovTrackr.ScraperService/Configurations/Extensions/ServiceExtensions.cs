@@ -1,9 +1,9 @@
-﻿using GovTrackr.ScraperService.Abstractions.HtmlProcessing;
-using GovTrackr.ScraperService.Abstractions.Scraping;
-using GovTrackr.ScraperService.Configurations.Options;
-using GovTrackr.ScraperService.Scraping;
-using GovTrackr.ScraperService.Scraping.Scrapers;
-using GovTrackr.ScraperService.Services.HtmlProcessing;
+﻿using GovTrackr.ScraperService.Configurations.Options;
+using GovTrackr.ScraperService.Contracts.Html;
+using GovTrackr.ScraperService.Contracts.Scraping;
+using GovTrackr.ScraperService.Services.Html;
+using GovTrackr.ScraperService.Services.Scraping;
+using GovTrackr.ScraperService.Services.Scraping.Scrapers;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -22,7 +22,7 @@ internal static class ServiceExtensions
             .AddMassTransit()
             // .AddScrapingService()
             .AddPresidentialActionScraper()
-            .AddHostedService<ScrapingService>()
+            .AddHostedService<DocumentScrapingService>()
             .AddHtmlToMarkdownConverter()
             .AddPlaywright();
 
@@ -69,7 +69,7 @@ internal static class ServiceExtensions
 
     private static IServiceCollection AddScrapingService(this IServiceCollection services)
     {
-        services.AddSingleton<IScrapingService, ScrapingService>();
+        services.AddSingleton<IDocumentScrapingService, DocumentScrapingService>();
         return services;
     }
 
@@ -82,14 +82,14 @@ internal static class ServiceExtensions
 
     private static IServiceCollection AddHtmlToMarkdownConverter(this IServiceCollection services)
     {
-        services.AddSingleton<IHtmlToMarkdownConverter, HtmlToMarkdownConverter>();
+        services.AddSingleton<IHtmlConverter, HtmlToMarkdownConverter>();
 
         return services;
     }
 
     private static IServiceCollection AddPlaywright(this IServiceCollection services)
     {
-        services.AddSingleton<IPlaywrightService, PlaywrightService>();
+        services.AddSingleton<IBrowserService, PlaywrightBrowserService>();
 
         return services;
     }

@@ -1,19 +1,19 @@
 ﻿using System.Text;
-using GovTrackr.ScraperService.Abstractions.HtmlProcessing;
-using GovTrackr.ScraperService.Abstractions.Scraping;
-using GovTrackr.ScraperService.Scraping.Models;
+using GovTrackr.ScraperService.Contracts.Html;
+using GovTrackr.ScraperService.Contracts.Scraping;
+using GovTrackr.ScraperService.Domain.Scraping;
 using Microsoft.Playwright;
 using Shared.Domain.Common;
 using Shared.Domain.PresidentialAction;
 using Shared.Infrastructure.Persistence.Context;
 
-namespace GovTrackr.ScraperService.Scraping.Scrapers;
+namespace GovTrackr.ScraperService.Services.Scraping.Scrapers;
 
 internal class PresidentialActionScraper(
     AppDbContext dbContext,
     ILogger<PresidentialActionScraper> logger,
-    IHtmlToMarkdownConverter markdownConverter,
-    IPlaywrightService playwrightService)
+    IHtmlConverter markdownConverter,
+    IBrowserService browserService)
     : IScraper
 {
 
@@ -26,7 +26,7 @@ internal class PresidentialActionScraper(
     {
         var result = new ScrapingBatchResult();
 
-        var page = await playwrightService.GetPageAsync();
+        var page = await browserService.GetPageAsync();
         try
         {
             foreach (var url in urls.TakeWhile(url => !cancellationToken.IsCancellationRequested))
@@ -37,7 +37,7 @@ internal class PresidentialActionScraper(
         }
         finally
         {
-            await playwrightService.ClosePageAsync(page);
+            await browserService.ClosePageAsync(page);
 
             if (result.Successful.Count != 0)
             {

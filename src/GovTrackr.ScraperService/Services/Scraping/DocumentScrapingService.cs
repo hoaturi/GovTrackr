@@ -1,12 +1,12 @@
-﻿using GovTrackr.ScraperService.Abstractions.Scraping;
+﻿using GovTrackr.ScraperService.Contracts.Scraping;
 using Shared.Domain.Common;
 using Shared.MessageContracts;
 
-namespace GovTrackr.ScraperService.Scraping;
+namespace GovTrackr.ScraperService.Services.Scraping;
 
-internal class ScrapingService(
+internal class DocumentScrapingService(
     IServiceProvider serviceProvider
-) : BackgroundService, IScrapingService
+) : BackgroundService, IDocumentScrapingService
 {
 
     public async Task ScrapeAsync(DocumentDiscovered message, CancellationToken cancellationToken)

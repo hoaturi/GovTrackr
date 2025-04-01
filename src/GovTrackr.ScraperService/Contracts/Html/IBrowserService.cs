@@ -1,8 +1,8 @@
 ﻿using Microsoft.Playwright;
 
-namespace GovTrackr.ScraperService.Abstractions.HtmlProcessing;
+namespace GovTrackr.ScraperService.Contracts.Html;
 
-internal interface IPlaywrightService
+internal interface IBrowserService
 {
     Task<IPage> GetPageAsync();
     Task ClosePageAsync(IPage page);

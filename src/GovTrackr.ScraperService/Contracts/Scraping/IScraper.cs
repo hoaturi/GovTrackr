@@ -1,4 +1,4 @@
-﻿namespace GovTrackr.ScraperService.Abstractions.Scraping;
+﻿namespace GovTrackr.ScraperService.Contracts.Scraping;
 
 internal interface IScraper
 {

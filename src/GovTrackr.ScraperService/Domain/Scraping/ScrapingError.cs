@@ -1,4 +1,4 @@
-﻿namespace GovTrackr.ScraperService.Scraping.Models;
+﻿namespace GovTrackr.ScraperService.Domain.Scraping;
 
 internal record ScrapingError(
     string Url,

@@ -1,7 +1,6 @@
-﻿using GovTrackr.ScraperService.Scraping.Models;
-using Shared.Domain.PresidentialAction;
+﻿using Shared.Domain.PresidentialAction;
 
-namespace GovTrackr.ScraperService.Scraping;
+namespace GovTrackr.ScraperService.Domain.Scraping;
 
 internal record ScrapingBatchResult
 {

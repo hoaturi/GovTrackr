@@ -1,9 +1,9 @@
-﻿using GovTrackr.ScraperService.Abstractions.HtmlProcessing;
+﻿using GovTrackr.ScraperService.Contracts.Html;
 using ReverseMarkdown;
 
-namespace GovTrackr.ScraperService.Services.HtmlProcessing;
+namespace GovTrackr.ScraperService.Services.Html;
 
-public class HtmlToMarkdownConverter : IHtmlToMarkdownConverter
+public class HtmlToMarkdownConverter : IHtmlConverter
 {
     private readonly Converter _converter;
 

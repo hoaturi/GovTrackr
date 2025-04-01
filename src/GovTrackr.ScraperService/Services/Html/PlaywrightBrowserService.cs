@@ -1,15 +1,15 @@
-﻿using GovTrackr.ScraperService.Abstractions.HtmlProcessing;
+﻿using GovTrackr.ScraperService.Contracts.Html;
 using Microsoft.Playwright;
 
-namespace GovTrackr.ScraperService.Services.HtmlProcessing;
+namespace GovTrackr.ScraperService.Services.Html;
 
-public class PlaywrightService : IPlaywrightService, IAsyncDisposable
+public class PlaywrightBrowserService : IBrowserService, IAsyncDisposable
 {
     private readonly Task _initializationTask;
     private IBrowser? _browser;
     private IPlaywright? _playwright;
 
-    public PlaywrightService()
+    public PlaywrightBrowserService()
     {
         _initializationTask = InitializeAsync();
     }
