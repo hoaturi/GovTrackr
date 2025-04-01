@@ -1,11 +1,15 @@
-﻿using GovTrackr.ScraperService.Configurations.Options;
+﻿using GovTrackr.ScraperService.Abstractions.HtmlProcessing;
+using GovTrackr.ScraperService.Abstractions.Scraping;
+using GovTrackr.ScraperService.Configurations.Options;
 using GovTrackr.ScraperService.Scraping;
-using GovTrackr.ScraperService.Scraping.Abstractions;
 using GovTrackr.ScraperService.Scraping.Scrapers;
+using GovTrackr.ScraperService.Services.HtmlProcessing;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Shared.Domain.Common;
 using Shared.Infrastructure.Persistence.Context;
+using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
 
 namespace GovTrackr.ScraperService.Configurations.Extensions;
 
@@ -16,9 +20,11 @@ internal static class ServiceExtensions
         services.AddConfigOptions(configuration)
             .AddDatabaseService()
             .AddMassTransit()
-            .AddScrapingService()
-            .AddScraperFactory()
-            .AddPresidentialActionScraper();
+            // .AddScrapingService()
+            .AddPresidentialActionScraper()
+            .AddHostedService<ScrapingService>()
+            .AddHtmlToMarkdownConverter()
+            .AddPlaywright();
 
         return services;
     }
@@ -63,21 +69,27 @@ internal static class ServiceExtensions
 
     private static IServiceCollection AddScrapingService(this IServiceCollection services)
     {
-        services.AddTransient<IScrapingService, ScrapingService>();
-        return services;
-    }
-
-    private static IServiceCollection AddScraperFactory(this IServiceCollection services)
-    {
-        services.AddSingleton<IScraperFactory, ScraperFactory>();
-
+        services.AddSingleton<IScrapingService, ScrapingService>();
         return services;
     }
 
     private static IServiceCollection AddPresidentialActionScraper(this IServiceCollection services)
     {
-        services.AddHttpClient<PresidentialActionScraper>();
-        services.AddTransient<IScraper, PresidentialActionScraper>();
+        services.AddKeyedScoped<IScraper, PresidentialActionScraper>(DocumentCategoryType.PresidentialAction);
+
+        return services;
+    }
+
+    private static IServiceCollection AddHtmlToMarkdownConverter(this IServiceCollection services)
+    {
+        services.AddSingleton<IHtmlToMarkdownConverter, HtmlToMarkdownConverter>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddPlaywright(this IServiceCollection services)
+    {
+        services.AddSingleton<IPlaywrightService, PlaywrightService>();
 
         return services;
     }

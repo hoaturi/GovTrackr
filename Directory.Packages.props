@@ -8,6 +8,7 @@
     <PackageVersion Include="MassTransit.Azure.ServiceBus.Core" Version="8.4.0" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.2.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="9.1.0" />
+    <PackageVersion Include="Microsoft.Playwright" Version="1.51.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
@@ -26,6 +27,7 @@
     <PackageVersion Include="Bogus" Version="35.6.2" />
     <PackageVersion Include="JetBrains.Annotations" Version="2025.1.0-eap1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <PackageVersion Include="ReverseMarkdown" Version="4.6.0" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.3.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />

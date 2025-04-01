@@ -10,6 +10,8 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Hosting"/>
         <PackageReference Include="MassTransit.Azure.ServiceBus.Core"/>
+        <PackageReference Include="Microsoft.Playwright"/>
+        <PackageReference Include="ReverseMarkdown"/>
     </ItemGroup>
 
     <ItemGroup>
