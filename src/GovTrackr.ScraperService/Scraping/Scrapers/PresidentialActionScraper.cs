@@ -37,7 +37,7 @@ internal class PresidentialActionScraper(
         }
         finally
         {
-            await playwrightService.ClosePageAsync();
+            await playwrightService.ClosePageAsync(page);
 
             if (result.Successful.Count != 0)
             {

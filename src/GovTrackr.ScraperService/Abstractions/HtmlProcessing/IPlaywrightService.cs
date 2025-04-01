@@ -5,5 +5,5 @@ namespace GovTrackr.ScraperService.Abstractions.HtmlProcessing;
 internal interface IPlaywrightService
 {
     Task<IPage> GetPageAsync();
-    Task ClosePageAsync();
+    Task ClosePageAsync(IPage page);
 }
