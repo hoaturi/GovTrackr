@@ -93,7 +93,7 @@ internal static class ServiceExtensions
 
     private static IServiceCollection AddPlaywright(this IServiceCollection services)
     {
-        services.AddSingleton<IBrowserService, PlaywrightBrowserService>();
+        services.AddSingleton<IBrowserService, PlaywrightService>();
 
         return services;
     }

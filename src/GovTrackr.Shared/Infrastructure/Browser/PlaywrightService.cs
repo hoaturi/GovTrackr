@@ -3,13 +3,13 @@ using Shared.Abstractions.Browser;
 
 namespace Shared.Infrastructure.Browser;
 
-public class PlaywrightBrowserService : IBrowserService, IAsyncDisposable
+public class PlaywrightService : IBrowserService, IAsyncDisposable
 {
     private readonly Task _initializationTask;
     private IBrowser? _browser;
     private IPlaywright? _playwright;
 
-    public PlaywrightBrowserService()
+    public PlaywrightService()
     {
         _initializationTask = InitializeAsync();
     }
