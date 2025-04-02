@@ -34,7 +34,7 @@ public class PlaywrightBrowserService : IBrowserService, IAsyncDisposable
     {
         var context = page.Context;
         await page.CloseAsync();
-        await context.CloseAsync(); 
+        await context.CloseAsync();
     }
 
     private async Task InitializeAsync()

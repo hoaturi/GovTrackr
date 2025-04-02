@@ -35,6 +35,10 @@ internal static class ServiceExtensions
             .Bind(configuration.GetSection(ConnectionStringsOptions.SectionName))
             .ValidateDataAnnotations();
 
+        services.AddOptionsWithValidateOnStart<ScrapersOptions>()
+            .Bind(configuration.GetSection(ScrapersOptions.SectionName))
+            .ValidateDataAnnotations();
+
         return services;
     }
 
@@ -58,7 +62,7 @@ internal static class ServiceExtensions
 
             config.UsingAzureServiceBus((context, cfg) =>
             {
-                var connectionStringsOptions = context.GetRequiredService<IOptions<ConnectionStringsOption>>().Value;
+                var connectionStringsOptions = context.GetRequiredService<IOptions<ConnectionStringsOptions>>().Value;
                 cfg.Host(connectionStringsOptions.AzureServiceBus);
                 cfg.ConfigureEndpoints(context);
             });
