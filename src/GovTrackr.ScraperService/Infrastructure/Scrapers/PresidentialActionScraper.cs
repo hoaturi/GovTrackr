@@ -1,16 +1,16 @@
 ﻿using System.Collections.Concurrent;
 using System.Text;
+using GovTrackr.ScraperService.Abstractions;
 using GovTrackr.ScraperService.Configurations.Options;
-using GovTrackr.ScraperService.Contracts.Html;
-using GovTrackr.ScraperService.Contracts.Scraping;
-using GovTrackr.ScraperService.Domain.Scraping;
+using GovTrackr.ScraperService.Infrastructure.Scrapers.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
+using Shared.Abstractions.Browser;
 using Shared.Domain.Common;
 using Shared.Domain.PresidentialAction;
 using Shared.Infrastructure.Persistence.Context;
 
-namespace GovTrackr.ScraperService.Services.Scraping.Scrapers;
+namespace GovTrackr.ScraperService.Infrastructure.Scrapers;
 
 internal class PresidentialActionScraper(
     AppDbContext dbContext,

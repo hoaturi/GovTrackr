@@ -1,4 +1,4 @@
-﻿namespace GovTrackr.ScraperService.Contracts.Html;
+﻿namespace GovTrackr.ScraperService.Abstractions;
 
 internal interface IHtmlConverter
 {

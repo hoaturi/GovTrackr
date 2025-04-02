@@ -1,7 +1,8 @@
 ﻿using FluentResults;
 using GovTrackr.Application.Common.Models;
 using Microsoft.AspNetCore.Mvc;
-using Shared.Models.Errors;
+using Shared.Abstractions.Errors;
+using Shared.Common.Errors;
 
 namespace GovTrackr.Application.Common;
 

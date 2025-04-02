@@ -1,7 +1,7 @@
-﻿using GovTrackr.ScraperService.Contracts.Html;
+﻿using GovTrackr.ScraperService.Abstractions;
 using ReverseMarkdown;
 
-namespace GovTrackr.ScraperService.Services.Html;
+namespace GovTrackr.ScraperService.Infrastructure.Converters;
 
 public class HtmlToMarkdownConverter : IHtmlConverter
 {

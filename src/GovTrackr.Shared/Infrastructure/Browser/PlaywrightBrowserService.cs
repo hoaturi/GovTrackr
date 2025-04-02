@@ -1,7 +1,7 @@
-﻿using GovTrackr.ScraperService.Contracts.Html;
-using Microsoft.Playwright;
+﻿using Microsoft.Playwright;
+using Shared.Abstractions.Browser;
 
-namespace GovTrackr.ScraperService.Services.Html;
+namespace Shared.Infrastructure.Browser;
 
 public class PlaywrightBrowserService : IBrowserService, IAsyncDisposable
 {

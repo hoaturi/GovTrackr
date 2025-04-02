@@ -1,4 +1,6 @@
-﻿namespace Shared.Models.Errors;
+﻿using Shared.Abstractions.Errors;
+
+namespace Shared.Common.Errors;
 
 public sealed class NotFoundError : ApplicationError
 {

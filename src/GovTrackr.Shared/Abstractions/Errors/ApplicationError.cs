@@ -1,6 +1,6 @@
 ﻿using FluentResults;
 
-namespace Shared.Models.Errors;
+namespace Shared.Abstractions.Errors;
 
 public abstract class ApplicationError : Error
 {

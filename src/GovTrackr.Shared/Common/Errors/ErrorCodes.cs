@@ -1,4 +1,4 @@
-﻿namespace Shared.Models.Errors;
+﻿namespace Shared.Common.Errors;
 
 public static class ErrorCodes
 

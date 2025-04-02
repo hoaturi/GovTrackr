@@ -1,13 +1,14 @@
-﻿using GovTrackr.ScraperService.Configurations.Options;
-using GovTrackr.ScraperService.Contracts.Html;
-using GovTrackr.ScraperService.Contracts.Scraping;
-using GovTrackr.ScraperService.Services.Html;
-using GovTrackr.ScraperService.Services.Scraping;
-using GovTrackr.ScraperService.Services.Scraping.Scrapers;
+﻿using GovTrackr.ScraperService.Abstractions;
+using GovTrackr.ScraperService.Configurations.Options;
+using GovTrackr.ScraperService.Infrastructure.Converters;
+using GovTrackr.ScraperService.Infrastructure.Scrapers;
+using GovTrackr.ScraperService.Services;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Shared.Abstractions.Browser;
 using Shared.Domain.Common;
+using Shared.Infrastructure.Browser;
 using Shared.Infrastructure.Persistence.Context;
 using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
 

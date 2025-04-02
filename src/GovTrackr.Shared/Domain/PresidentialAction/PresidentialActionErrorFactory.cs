@@ -1,4 +1,5 @@
-﻿using Shared.Models.Errors;
+﻿using Shared.Abstractions.Errors;
+using Shared.Common.Errors;
 
 namespace Shared.Domain.PresidentialAction;
 

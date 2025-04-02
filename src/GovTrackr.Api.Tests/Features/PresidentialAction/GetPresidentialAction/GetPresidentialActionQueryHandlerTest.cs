@@ -4,9 +4,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using GovTrackr.Application.Features.PresidentialAction.GetPresidentialAction;
 using Microsoft.EntityFrameworkCore.Storage;
+using Shared.Abstractions.Errors;
+using Shared.Common.Errors;
 using Shared.Domain.Common;
 using Shared.Infrastructure.Persistence.Context;
-using Shared.Models.Errors;
 using Xunit;
 
 namespace GovTrackr.Api.Tests.Features.PresidentialAction.GetPresidentialAction;
