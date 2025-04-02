@@ -19,7 +19,7 @@
     <ItemGroup>
         <ProjectReference Include="..\GovTrackr.Api\GovTrackr.Api.csproj"/>
         <ProjectReference Include="..\GovTrackr.MigrationService\GovTrackr.MigrationService.csproj"/>
-        <ProjectReference Include="..\GovTrackr.ScraperService\GovTrackr.ScraperService.csproj"/>
+        <ProjectReference Include="..\GovTrackr.ScrapingService\GovTrackr.ScrapingService.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GovTrackr.ScraperService.Configurations.Options;
+namespace GovTrackr.ScrapingService.Configurations.Options;
 
 internal class ScrapersOptions
 {

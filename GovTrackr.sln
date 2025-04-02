@@ -15,6 +15,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovTrackr.Shared", "src\GovTrackr.Shared\GovTrackr.Shared.csproj", "{3C2E6911-9D9D-4FAA-8861-35D66AF2DB35}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovTrackr.ScraperService", "src\GovTrackr.ScraperService\GovTrackr.ScraperService.csproj", "{8983096D-31A3-497D-834A-272A7C572F29}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovTrackr.ScrapingService", "src\GovTrackr.ScrapingService\GovTrackr.ScrapingService.csproj", "{8983096D-31A3-497D-834A-272A7C572F29}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

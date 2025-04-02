@@ -1,4 +1,4 @@
-﻿namespace GovTrackr.ScraperService.Abstractions;
+﻿namespace GovTrackr.ScrapingService.Abstractions;
 
 internal interface IHtmlConverter
 {

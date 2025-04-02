@@ -21,7 +21,7 @@ builder.AddProject<GovTrackr_MigrationService>("GovTrackrMigration")
     .WithReference(database)
     .WaitFor(database);
 
-builder.AddProject<GovTrackr_ScraperService>("GovTrackrScraperService")
+builder.AddProject<GovTrackr_ScrapingService>("GovTrackrScraperService")
     .WithReference(database)
     .WaitFor(database);
 
