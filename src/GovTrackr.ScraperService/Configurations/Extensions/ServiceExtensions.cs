@@ -31,8 +31,8 @@ internal static class ServiceExtensions
 
     private static IServiceCollection AddConfigOptions(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddOptionsWithValidateOnStart<ConnectionStringsOption>()
-            .Bind(configuration.GetSection(ConnectionStringsOption.SectionName))
+        services.AddOptionsWithValidateOnStart<ConnectionStringsOptions>()
+            .Bind(configuration.GetSection(ConnectionStringsOptions.SectionName))
             .ValidateDataAnnotations();
 
         return services;
@@ -43,7 +43,7 @@ internal static class ServiceExtensions
         services.AddDbContext<AppDbContext>((serviceProvider, options) =>
         {
             var connectionStringsOptions =
-                serviceProvider.GetRequiredService<IOptions<ConnectionStringsOption>>().Value;
+                serviceProvider.GetRequiredService<IOptions<ConnectionStringsOptions>>().Value;
             options.UseNpgsql(connectionStringsOptions.GovTrackrDb);
         });
 

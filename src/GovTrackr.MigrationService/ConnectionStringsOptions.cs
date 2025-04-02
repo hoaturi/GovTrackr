@@ -1,11 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GovTrackr.ScraperService.Configurations.Options;
+namespace GovTrackr.MigrationService;
 
-internal class ConnectionStringsOption
+internal class ConnectionStringsOptions
 {
     internal const string SectionName = "ConnectionStrings";
 
     [Required] public string GovTrackrDb { get; init; } = null!;
-    [Required] public string AzureServiceBus { get; init; } = null!;
 }
