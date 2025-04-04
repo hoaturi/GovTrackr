@@ -1,0 +1,87 @@
+﻿using GovTrackr.DiscoveryService.Abstractions;
+using GovTrackr.DiscoveryService.Configurations.Options;
+using GovTrackr.DiscoveryService.Infrastructure.Strategies;
+using MassTransit;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Shared.Abstractions.Browser;
+using Shared.Infrastructure.Browser;
+using Shared.Infrastructure.Persistence.Context;
+
+namespace GovTrackr.DiscoveryService.Configurations.Extensions;
+
+internal static class ServiceExtensions
+{
+    internal static IServiceCollection AddAppServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddConfigOptions(configuration)
+            .AddDatabaseService()
+            .AddMassTransitWithAzureServiceBus()
+            .AddPlaywright()
+            .AddDiscoveryStrategies()
+            .AddDiscoveryService();
+
+        return services;
+    }
+
+    private static IServiceCollection AddConfigOptions(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOptionsWithValidateOnStart<ConnectionStringsOptions>()
+            .Bind(configuration.GetSection(ConnectionStringsOptions.SectionName))
+            .ValidateDataAnnotations();
+
+        return services;
+    }
+
+    private static IServiceCollection AddDatabaseService(this IServiceCollection services)
+    {
+        services.AddDbContext<AppDbContext>((serviceProvider, options) =>
+        {
+            var connectionStringsOptions =
+                serviceProvider.GetRequiredService<IOptions<ConnectionStringsOptions>>().Value;
+            options.UseNpgsql(connectionStringsOptions.GovTrackrDb);
+        });
+
+        return services;
+    }
+
+    private static IServiceCollection AddMassTransitWithAzureServiceBus(this IServiceCollection services)
+    {
+        services.AddMassTransit(config =>
+        {
+            config.SetKebabCaseEndpointNameFormatter();
+
+            config.UsingAzureServiceBus((context, cfg) =>
+            {
+                var connectionStringsOptions = context.GetRequiredService<IOptions<ConnectionStringsOptions>>().Value;
+                cfg.Host(connectionStringsOptions.AzureServiceBus);
+                cfg.ConfigureEndpoints(context);
+            });
+        });
+
+        return services;
+    }
+
+    private static IServiceCollection AddPlaywright(this IServiceCollection services)
+    {
+        services.AddSingleton<IBrowserService, PlaywrightService>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddDiscoveryService(this IServiceCollection services)
+    {
+        services.AddScoped<IDiscoveryService, Services.DiscoveryService>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddDiscoveryStrategies(this IServiceCollection services)
+    {
+        services.AddScoped<IDiscoveryStrategy, PresidentialActionStrategy>();
+
+        return services;
+    }
+}
