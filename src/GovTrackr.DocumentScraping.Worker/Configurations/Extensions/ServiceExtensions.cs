@@ -20,10 +20,8 @@ internal static class ServiceExtensions
     {
         services.AddConfigOptions(configuration)
             .AddDatabaseService()
-            .AddMassTransit()
-            // .AddScrapingService()
+            .AddMassTransitWithConsumer()
             .AddPresidentialActionScraper()
-            .AddHostedService<ScrapingService>()
             .AddHtmlToMarkdownConverter()
             .AddPlaywright();
 
@@ -55,11 +53,12 @@ internal static class ServiceExtensions
         return services;
     }
 
-    private static IServiceCollection AddMassTransit(this IServiceCollection services)
+    private static IServiceCollection AddMassTransitWithConsumer(this IServiceCollection services)
     {
         services.AddMassTransit(config =>
         {
             config.SetKebabCaseEndpointNameFormatter();
+            config.AddConsumer<DocumentDiscoveredConsumer>();
 
             config.UsingAzureServiceBus((context, cfg) =>
             {
@@ -69,12 +68,6 @@ internal static class ServiceExtensions
             });
         });
 
-        return services;
-    }
-
-    private static IServiceCollection AddScrapingService(this IServiceCollection services)
-    {
-        services.AddSingleton<IScrapingService, ScrapingService>();
         return services;
     }
 
