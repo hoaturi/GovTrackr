@@ -1,13 +1,13 @@
-﻿using GovTrackr.DiscoveryService.Abstractions;
+﻿using GovTrackr.DocumentDiscovery.Functions.Application.Interfaces;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-namespace GovTrackr.DiscoveryService.Services;
+namespace GovTrackr.DocumentDiscovery.Functions.Functions;
 
-internal class DiscoveryService(
+internal class DocumentDocumentDiscoveryFunction(
     IEnumerable<IDiscoveryStrategy> strategies,
-    ILogger<DiscoveryService> logger
-) : IDiscoveryService
+    ILogger<DocumentDocumentDiscoveryFunction> logger
+) : IDocumentDiscoveryFunction
 {
     [Function("DocumentDiscovery")]
     public async Task DiscoverDocumentsAsync(

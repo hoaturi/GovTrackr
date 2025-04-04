@@ -1,6 +1,7 @@
-﻿using GovTrackr.DiscoveryService.Abstractions;
-using GovTrackr.DiscoveryService.Configurations.Options;
-using GovTrackr.DiscoveryService.Infrastructure.Strategies;
+﻿using GovTrackr.DocumentDiscovery.Functions.Application.Interfaces;
+using GovTrackr.DocumentDiscovery.Functions.Configurations.Options;
+using GovTrackr.DocumentDiscovery.Functions.Functions;
+using GovTrackr.DocumentDiscovery.Functions.Infrastructure.Strategies;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -10,7 +11,7 @@ using Shared.Abstractions.Browser;
 using Shared.Infrastructure.Browser;
 using Shared.Infrastructure.Persistence.Context;
 
-namespace GovTrackr.DiscoveryService.Configurations.Extensions;
+namespace GovTrackr.DocumentDiscovery.Functions.Configurations.Extensions;
 
 internal static class ServiceExtensions
 {
@@ -73,7 +74,7 @@ internal static class ServiceExtensions
 
     private static IServiceCollection AddDiscoveryService(this IServiceCollection services)
     {
-        services.AddScoped<IDiscoveryService, Services.DiscoveryService>();
+        services.AddScoped<IDocumentDiscoveryFunction, DocumentDocumentDiscoveryFunction>();
 
         return services;
     }

@@ -1,4 +1,4 @@
-using GovTrackr.DiscoveryService.Configurations.Extensions;
+using GovTrackr.DocumentDiscovery.Functions.Configurations.Extensions;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.Hosting;
 

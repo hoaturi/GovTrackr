@@ -1,4 +1,4 @@
-﻿using GovTrackr.DiscoveryService.Abstractions;
+﻿using GovTrackr.DocumentDiscovery.Functions.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
@@ -7,7 +7,7 @@ using Shared.Domain.Common;
 using Shared.Infrastructure.Persistence.Context;
 using Shared.MessageContracts;
 
-namespace GovTrackr.DiscoveryService.Infrastructure.Strategies;
+namespace GovTrackr.DocumentDiscovery.Functions.Infrastructure.Strategies;
 
 public class PresidentialActionStrategy(
     AppDbContext dbContext,

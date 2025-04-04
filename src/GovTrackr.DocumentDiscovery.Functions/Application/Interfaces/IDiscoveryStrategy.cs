@@ -1,6 +1,6 @@
 ﻿using Shared.MessageContracts;
 
-namespace GovTrackr.DiscoveryService.Abstractions;
+namespace GovTrackr.DocumentDiscovery.Functions.Application.Interfaces;
 
 internal interface IDiscoveryStrategy
 {

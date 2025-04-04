@@ -16,7 +16,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovTrackr.Shared", "src\Gov
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovTrackr.ScrapingService", "src\GovTrackr.ScrapingService\GovTrackr.ScrapingService.csproj", "{8983096D-31A3-497D-834A-272A7C572F29}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovTrackr.DiscoveryService", "src\GovTrackr.DiscoveryService\GovTrackr.DiscoveryService.csproj", "{E07C7274-AC9D-44BC-BEE8-383D197C538A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovTrackr.DocumentDiscovery.Functions", "src\GovTrackr.DocumentDiscovery.Functions\GovTrackr.DocumentDiscovery.Functions.csproj", "{E07C7274-AC9D-44BC-BEE8-383D197C538A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

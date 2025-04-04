@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GovTrackr.DiscoveryService.Configurations.Options;
+namespace GovTrackr.DocumentDiscovery.Functions.Configurations.Options;
 
 internal class ConnectionStringsOptions
 {
