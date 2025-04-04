@@ -58,7 +58,7 @@ internal class DocumentDocumentDiscoveryFunction(
         }
         else
         {
-            logger.LogInformation("Strategy {StrategyName} found no new documents or failed.", strategyName);
+            logger.LogInformation("Strategy {StrategyName} found no new documents.", strategyName);
         }
 
         logger.LogInformation("Completed discovery strategy: {StrategyName}", strategyName);

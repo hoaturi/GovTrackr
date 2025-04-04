@@ -71,12 +71,7 @@ internal class PresidentialActionStrategy(
 
                 // Extract and process the documents
                 var (foundDuplicate, newDocs) = await ProcessPageItemsAsync(items, pageNumber, cancellationToken);
-                if (newDocs.Count == 0)
-                {
-                    logger.LogInformation("No new documents found on page {PageNumber}. Ending pagination.",
-                        pageNumber);
-                    break;
-                }
+                if (newDocs.Count == 0) break;
 
                 discoveredDocuments.AddRange(newDocs);
 
