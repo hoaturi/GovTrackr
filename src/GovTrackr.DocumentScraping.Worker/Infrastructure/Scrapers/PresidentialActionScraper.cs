@@ -12,7 +12,6 @@ using Shared.MessageContracts;
 namespace GovTrackr.DocumentScraping.Worker.Infrastructure.Scrapers;
 
 internal class PresidentialActionScraper(
-    ILogger<PresidentialActionScraper> logger,
     IHtmlConverter markdownConverter,
     IBrowserService browserService,
     IOptions<ScrapersOptions> options

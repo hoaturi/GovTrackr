@@ -20,9 +20,11 @@ internal class DocumentDiscoveredConsumer(
         var message = context.Message;
         var cancellationToken = context.CancellationToken;
 
+        var categoryName = message.DocumentCategory.ToString();
+
         if (message.Documents.Count == 0)
         {
-            logger.LogWarning("Received DocumentDiscovered message with no URLs.");
+            logger.LogWarning("[{Category}] Received discovery message with no documents.", categoryName);
             return;
         }
 
@@ -30,15 +32,13 @@ internal class DocumentDiscoveredConsumer(
 
         if (newDocuments.Count == 0)
         {
-            logger.LogInformation(
-                "All {UrlCount} documents for category {Category} already exist. Skipping scraping.",
-                message.Documents.Count, message.DocumentCategory);
+            logger.LogInformation("[{Category}] All {Total} documents already exist. Skipping scraping.",
+                categoryName, message.Documents.Count);
             return;
         }
 
-        logger.LogInformation(
-            "Found {NewUrlCount} new documents to scrape out of {TotalReceived} for category {Category}.",
-            newDocuments.Count, message.Documents.Count, message.DocumentCategory);
+        logger.LogInformation("[{Category}] {NewCount} new document(s) out of {Total} will be scraped.",
+            categoryName, newDocuments.Count, message.Documents.Count);
 
         var scraper = GetScraper(message.DocumentCategory);
         var scrapeResult = await scraper.ScrapeAsync(message.Documents, cancellationToken);
@@ -83,7 +83,6 @@ internal class DocumentDiscoveredConsumer(
         var failedDetails = new List<(string Url, string Error)>();
 
         foreach (var document in successfulDocuments)
-        {
             try
             {
                 await dbContext.PresidentialActions.AddAsync(document, cancellationToken);
@@ -92,7 +91,8 @@ internal class DocumentDiscoveredConsumer(
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error saving document from URL {Url}", document.SourceUrl);
+                logger.LogError(ex, "[{Category}] Failed to save document from URL: {Url}", category,
+                    document.SourceUrl);
                 failedSaves++;
                 failedDetails.Add((document.SourceUrl, ex.Message));
             }
@@ -100,21 +100,14 @@ internal class DocumentDiscoveredConsumer(
             {
                 dbContext.Entry(document).State = EntityState.Detached;
             }
-        }
 
         if (successfulSaves > 0)
-        {
-            logger.LogInformation(
-                "Successfully saved {SuccessCount} documents for category {Category}.",
-                successfulSaves, category);
-        }
+            logger.LogInformation("[{Category}] Successfully saved {SuccessCount} document(s).",
+                category, successfulSaves);
 
         if (failedSaves > 0)
-        {
-            logger.LogWarning(
-                "Failed to save {FailureCount} documents for category {Category}. Details: {@FailedDetails}",
-                failedSaves, category, failedDetails);
-        }
+            logger.LogWarning("[{Category}] Failed to save {FailureCount} document(s). Details: {@Failures}",
+                category, failedSaves, failedDetails);
     }
 
     private void LogScrapeFailures(
@@ -125,14 +118,8 @@ internal class DocumentDiscoveredConsumer(
         if (failures.Count == 0) return;
 
         logger.LogWarning(
-            "Scraping failed for {FailureCount} of {TotalCount} documents in category {Category}.",
-            failures.Count, totalAttempted, category);
-
-        foreach (var failure in failures)
-        {
-            logger.LogWarning("Scrape Failure - URL: {Url}, Reason: {Reason}",
-                failure.Url, failure.Message);
-        }
+            "[{Category}] Scraping failed for {FailureCount} of {TotalCount} document(s).",
+            category, failures.Count, totalAttempted);
     }
 
     private IScraper GetScraper(DocumentCategoryType category)
