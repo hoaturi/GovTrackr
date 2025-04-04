@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Text;
+﻿using System.Text;
 using GovTrackr.DocumentScraping.Worker.Application.Interfaces;
 using GovTrackr.DocumentScraping.Worker.Configurations.Options;
 using GovTrackr.DocumentScraping.Worker.Infrastructure.Scrapers.Models;
@@ -26,62 +25,45 @@ internal class PresidentialActionScraper(
     public async Task<ScrapingResult> ScrapeAsync(List<DocumentInfo> documents, CancellationToken cancellationToken)
     {
         var result = new ScrapingResult();
+        if (documents.Count == 0) return result;
 
-        if (documents.Count == 0)
-        {
-            logger.LogWarning("No documents to scrape.");
-            return result;
-        }
-
-        // Use Semaphore to limit concurrent browser page usage
         using var semaphore = new SemaphoreSlim(options.Value.MaxConcurrentPages);
-        var tasks = new List<Task>();
+        var tasks = documents.Select(doc => ScrapeWithConcurrencyAsync(doc, semaphore, cancellationToken)).ToList();
 
-        // Thread-safe collections for successful documents and failures
-        var successfulDocs = new ConcurrentBag<PresidentialAction>();
-        var failureList = new ConcurrentBag<ScrapingError>();
-
-        foreach (var document in documents)
-        {
-            await semaphore.WaitAsync(cancellationToken);
-
-            // Create a new task for each URL with new thread
-            var task = Task.Run(async () =>
-            {
-                var page = await browserService.GetPageAsync();
-                try
-                {
-                    var (action, errorMessage) = await ScrapeDocumentAsync(page, document);
-                    if (action is not null)
-                        successfulDocs.Add(action);
-                    else if (errorMessage is not null)
-                        failureList.Add(new ScrapingError(document, errorMessage));
-                }
-                catch (Exception ex)
-                {
-                    failureList.Add(new ScrapingError(document, ex.Message));
-                }
-                finally
-                {
-                    await browserService.ClosePageAsync(page);
-                    semaphore.Release();
-                }
-            }, cancellationToken);
-
-            tasks.Add(task);
-        }
-
-        // Wait for all scraping tasks to finish
-        await Task.WhenAll(tasks);
-
-        // Transfer results to scraping result object
-        result.Successful.AddRange(successfulDocs);
-        foreach (var failure in failureList) result.Failures.Add(failure);
+        var results = await Task.WhenAll(tasks);
+        foreach (var (action, error, url) in results)
+            if (action is not null)
+                result.Successful.Add(action);
+            else if (error is not null)
+                result.Failures.Add(new ScrapingError(url, error));
 
         return result;
     }
 
-    // Scrape a single document and return either a populated entity or error message
+    private async Task<(PresidentialAction? Action, string? Error, string Url)> ScrapeWithConcurrencyAsync(
+        DocumentInfo document,
+        SemaphoreSlim semaphore,
+        CancellationToken cancellationToken)
+    {
+        await semaphore.WaitAsync(cancellationToken);
+        var page = await browserService.GetPageAsync();
+
+        try
+        {
+            var (action, error) = await ScrapeDocumentAsync(page, document);
+            return (action, error, document.Url);
+        }
+        catch (Exception ex)
+        {
+            return (null, ex.Message, document.Url);
+        }
+        finally
+        {
+            await browserService.ClosePageAsync(page);
+            semaphore.Release();
+        }
+    }
+
     private async Task<(PresidentialAction? Action, string? ErrorMessage)> ScrapeDocumentAsync(IPage page,
         DocumentInfo document)
     {
@@ -94,7 +76,7 @@ internal class PresidentialActionScraper(
         if (string.IsNullOrEmpty(contentHtml)) return (null, "Failed to extract content");
 
         var categoryType = ParseCategoryType(category, document.Title, contentHtml);
-        if (categoryType is null) return (null, $"Failed to extract or infer category for {document.Url}");
+        if (categoryType is null) return (null, "Failed to infer category");
 
         var publicationDate = await ExtractDateTimeInUtcAsync(page);
         if (publicationDate is null) return (null, "Failed to extract publication date");
@@ -110,42 +92,56 @@ internal class PresidentialActionScraper(
         }, null);
     }
 
-    // Extract text content from a page element by selector
     private static async Task<string?> ExtractTextAsync(IPage page, string selector)
     {
         var element = page.Locator(selector);
-        if (await element.CountAsync() == 0)
-            return null;
-
+        if (await element.CountAsync() == 0) return null;
         var text = await element.InnerTextAsync();
         return string.IsNullOrWhiteSpace(text) ? null : text.Trim();
     }
 
-    // Determine document subcategory type based on content, title, or category text
+    private static async Task<string?> ExtractContentAsync(IPage page)
+    {
+        var container = page.Locator(ContentContainerSelector);
+        if (await container.CountAsync() == 0) return null;
+
+        var paragraphs = container.Locator("p");
+        var count = await paragraphs.CountAsync();
+        if (count == 0) return null;
+
+        var builder = new StringBuilder();
+        for (var i = 0; i < count; i++)
+            builder.Append(await paragraphs.Nth(i).InnerHTMLAsync());
+
+        return builder.ToString().Trim();
+    }
+
+    private static async Task<DateTime?> ExtractDateTimeInUtcAsync(IPage page)
+    {
+        var element = page.Locator(DateSelector);
+        var dateAttr = await element.GetAttributeAsync("datetime");
+        return DateTime.TryParse(dateAttr, out var date) ? date.ToUniversalTime() : null;
+    }
+
     private static DocumentSubCategoryType? ParseCategoryType(string? category, string title, string content)
     {
         if (!string.IsNullOrWhiteSpace(category))
-        {
-            var normalizedCategory = category.Trim();
-            switch (normalizedCategory)
+            return category.Trim() switch
             {
-                case "Executive Orders":
-                    return DocumentSubCategoryType.ExecutiveOrder;
-                case "Presidential Memoranda":
-                    return DocumentSubCategoryType.Memoranda;
-                case "Proclamations":
-                    return DocumentSubCategoryType.Proclamation;
-                case "Nominations & Appointments":
-                    return DocumentSubCategoryType.Nomination;
-            }
-        }
+                "Executive Orders" => DocumentSubCategoryType.ExecutiveOrder,
+                "Presidential Memoranda" => DocumentSubCategoryType.Memoranda,
+                "Proclamations" => DocumentSubCategoryType.Proclamation,
+                "Nominations & Appointments" => DocumentSubCategoryType.Nomination,
+                _ => null
+            };
 
-        // Fallback inference based on content keywords
         if (title.Contains("Memorandum", StringComparison.OrdinalIgnoreCase) ||
             content.Contains("Memorandum", StringComparison.OrdinalIgnoreCase))
             return DocumentSubCategoryType.Memoranda;
+
         if (content.Contains("By the authority vested in me", StringComparison.OrdinalIgnoreCase))
             return DocumentSubCategoryType.ExecutiveOrder;
+
         if (content.Contains("Proclamation", StringComparison.OrdinalIgnoreCase))
             return DocumentSubCategoryType.Proclamation;
 
@@ -158,39 +154,6 @@ internal class PresidentialActionScraper(
             content.Contains("appointed", StringComparison.OrdinalIgnoreCase) ||
             content.Contains("appointee", StringComparison.OrdinalIgnoreCase))
             return DocumentSubCategoryType.Nomination;
-
-        return null;
-    }
-
-    // Extract and combine paragraph content from the page’s main content area
-    private static async Task<string?> ExtractContentAsync(IPage page)
-    {
-        var contentContainer = page.Locator(ContentContainerSelector);
-        if (await contentContainer.CountAsync() == 0) return null;
-
-        var contentParagraphs = contentContainer.Locator("p");
-        var paragraphCount = await contentParagraphs.CountAsync();
-        if (paragraphCount == 0) return null;
-
-        var contentBuilder = new StringBuilder();
-        for (var i = 0; i < paragraphCount; i++)
-        {
-            var paragraph = contentParagraphs.Nth(i);
-            var paragraphHtml = await paragraph.InnerHTMLAsync();
-            contentBuilder.Append(paragraphHtml);
-        }
-
-        return contentBuilder.ToString().Trim();
-    }
-
-    // Extract the publication date in UTC format from the page
-    private static async Task<DateTime?> ExtractDateTimeInUtcAsync(IPage page)
-    {
-        var element = page.Locator(DateSelector);
-
-        var dateAttribute = await element.GetAttributeAsync("datetime");
-        if (!string.IsNullOrWhiteSpace(dateAttribute) && DateTime.TryParse(dateAttribute, out var parsedDate))
-            return parsedDate.ToUniversalTime();
 
         return null;
     }
