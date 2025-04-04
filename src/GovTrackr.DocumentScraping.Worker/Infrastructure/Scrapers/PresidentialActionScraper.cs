@@ -103,14 +103,14 @@ internal class PresidentialActionScraper(
         if (string.IsNullOrEmpty(title)) return (null, "Failed to extract title");
 
         var category = await ExtractTextAsync(page, CategorySelector);
-        var categoryType = ParseCategoryType(category);
-        if (categoryType is null) return (null, "Failed to extract or parse category");
+        var contentHtml = await ExtractContentAsync(page);
+        if (string.IsNullOrEmpty(contentHtml)) return (null, "Failed to extract content");
+
+        var categoryType = ParseCategoryType(category, title, contentHtml);
+        if (categoryType is null) return (null, $"Failed to extract or infer category for {url}");
 
         var publicationDate = await ExtractDateTimeInUtcAsync(page);
         if (publicationDate is null) return (null, "Failed to extract publication date");
-
-        var contentHtml = await ExtractContentAsync(page);
-        if (string.IsNullOrEmpty(contentHtml)) return (null, "Failed to extract content");
 
         return (new PresidentialAction
         {
@@ -133,16 +133,44 @@ internal class PresidentialActionScraper(
         return string.IsNullOrWhiteSpace(text) ? null : text.Trim();
     }
 
-    private static DocumentSubCategoryType? ParseCategoryType(string? category)
+    private static DocumentSubCategoryType? ParseCategoryType(string? category, string title, string content)
     {
-        return category switch
+        if (!string.IsNullOrWhiteSpace(category))
         {
-            "Executive Orders" => DocumentSubCategoryType.ExecutiveOrder,
-            "Presidential Memoranda" => DocumentSubCategoryType.Memoranda,
-            "Proclamations" => DocumentSubCategoryType.Proclamation,
-            "Nominations & Appointments" => DocumentSubCategoryType.Nomination,
-            _ => null
-        };
+            var normalizedCategory = category.Trim();
+            switch (normalizedCategory)
+            {
+                case "Executive Orders":
+                    return DocumentSubCategoryType.ExecutiveOrder;
+                case "Presidential Memoranda":
+                    return DocumentSubCategoryType.Memoranda;
+                case "Proclamations":
+                    return DocumentSubCategoryType.Proclamation;
+                case "Nominations & Appointments":
+                    return DocumentSubCategoryType.Nomination;
+            }
+        }
+
+        // Fallback: try to infer from title or content
+        if (title.Contains("Memorandum", StringComparison.OrdinalIgnoreCase) ||
+            content.Contains("Memorandum", StringComparison.OrdinalIgnoreCase))
+            return DocumentSubCategoryType.Memoranda;
+        if (content.Contains("By the authority vested in me", StringComparison.OrdinalIgnoreCase))
+            return DocumentSubCategoryType.ExecutiveOrder;
+        if (content.Contains("Proclamation", StringComparison.OrdinalIgnoreCase))
+            return DocumentSubCategoryType.Proclamation;
+
+        if (title.Contains("appointment", StringComparison.OrdinalIgnoreCase) ||
+            title.Contains("nomination", StringComparison.OrdinalIgnoreCase) ||
+            content.Contains("appointment", StringComparison.OrdinalIgnoreCase) ||
+            content.Contains("appointments", StringComparison.OrdinalIgnoreCase) ||
+            content.Contains("nomination", StringComparison.OrdinalIgnoreCase) ||
+            content.Contains("nominations", StringComparison.OrdinalIgnoreCase) ||
+            content.Contains("appointed", StringComparison.OrdinalIgnoreCase) ||
+            content.Contains("appointee", StringComparison.OrdinalIgnoreCase))
+            return DocumentSubCategoryType.Nomination;
+
+        return null;
     }
 
     private static async Task<string?> ExtractContentAsync(IPage page)
