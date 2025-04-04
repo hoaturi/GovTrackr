@@ -1,8 +1,8 @@
-﻿using Shared.MessageContracts;
+﻿using GovTrackr.DocumentDiscovery.Functions.Infrastructure.Strategies.Models;
 
 namespace GovTrackr.DocumentDiscovery.Functions.Application.Interfaces;
 
 internal interface IDocumentDiscoveryStrategy
 {
-    Task<DocumentDiscovered?> DiscoverDocumentsAsync(CancellationToken cancellationToken);
+    Task<DiscoveryResult> DiscoverDocumentsAsync(CancellationToken cancellationToken);
 }

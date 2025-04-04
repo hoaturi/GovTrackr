@@ -2,6 +2,7 @@
 using MassTransit;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using Shared.MessageContracts;
 
 namespace GovTrackr.DocumentDiscovery.Functions.Functions;
 
@@ -13,7 +14,7 @@ internal class DocumentDocumentDiscoveryFunction(
 {
     [Function("DocumentDiscovery")]
     public async Task RunAsync(
-        [TimerTrigger("*/10 * * * * *")] TimerInfo timerInfo,
+        [TimerTrigger("0 */5 * * * *")] TimerInfo timerInfo,
         CancellationToken cancellationToken)
     {
         if (!strategies.Any())
@@ -22,32 +23,41 @@ internal class DocumentDocumentDiscoveryFunction(
             return;
         }
 
-        logger.LogInformation("Starting document discovery.");
-
         var discoveryTasks = strategies
             .Select(strategy => ExecuteStrategyAsync(strategy, cancellationToken))
             .ToList();
 
         await Task.WhenAll(discoveryTasks);
-
-        logger.LogInformation("Document discovery completed.");
     }
 
     private async Task ExecuteStrategyAsync(
         IDocumentDiscoveryStrategy strategy,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken)
     {
         var strategyName = strategy.GetType().Name;
+        logger.LogInformation("Running discovery strategy: {StrategyName}", strategyName);
 
         var result = await strategy.DiscoverDocumentsAsync(cancellationToken);
 
-        if (result?.Documents.Count > 0)
-        {
-            logger.LogInformation("{StrategyName} discovered and published {Count} new document(s).",
-                strategyName, result.Documents.Count);
+        foreach (var error in result.Errors)
+            logger.LogWarning("[{StrategyName}] Discovery error at URL: {Url}. Message: {Message}",
+                strategyName, error.Url, error.Message);
 
-            await publishEndpoint.Publish(result, cancellationToken);
+        if (result.DiscoveredDocuments.Count > 0)
+        {
+            var discoveredDocuments = new DocumentDiscovered
+            {
+                DocumentCategory = result.DocumentCategory,
+                Documents = result.DiscoveredDocuments
+            };
+
+            await publishEndpoint.Publish(discoveredDocuments, cancellationToken);
+            logger.LogInformation("[{StrategyName}] Published {Count} new document(s).",
+                strategyName, result.DiscoveredDocuments.Count);
+        }
+        else
+        {
+            logger.LogInformation("[{StrategyName}] No new documents discovered.", strategyName);
         }
     }
 }

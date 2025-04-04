@@ -1,6 +1,6 @@
 ﻿using GovTrackr.DocumentDiscovery.Functions.Application.Interfaces;
+using GovTrackr.DocumentDiscovery.Functions.Infrastructure.Strategies.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
 using Shared.Abstractions.Browser;
 using Shared.Domain.Common;
@@ -11,8 +11,7 @@ namespace GovTrackr.DocumentDiscovery.Functions.Infrastructure.Strategies;
 
 internal class PresidentialActionStrategy(
     AppDbContext dbContext,
-    IBrowserService browserService,
-    ILogger<PresidentialActionStrategy> logger
+    IBrowserService browserService
 ) : IDocumentDiscoveryStrategy
 {
     private const string BaseUrl = "https://www.whitehouse.gov/presidential-actions/";
@@ -20,9 +19,11 @@ internal class PresidentialActionStrategy(
     private const string TitleSelector = "h2.wp-block-post-title";
     private const string LinkSelector = $"{TitleSelector} a";
 
-    public async Task<DocumentDiscovered?> DiscoverDocumentsAsync(CancellationToken cancellationToken)
+    // Paginate through presidential action listings until a duplicate is found or cancellation is requested.
+    public async Task<DiscoveryResult> DiscoverDocumentsAsync(CancellationToken cancellationToken)
     {
         var discovered = new List<DocumentInfo>();
+        var errors = new List<DiscoveryError>();
         IPage? page = null;
 
         try
@@ -35,80 +36,57 @@ internal class PresidentialActionStrategy(
                 var url = pageNumber == 1 ? BaseUrl : $"{BaseUrl}page/{pageNumber}/";
 
                 var response = await page.GotoAsync(url);
+
+                // If the page failed to load, capture an error and stop processing.
                 if (response is null || !response.Ok)
                 {
-                    HandleInvalidResponse(response, pageNumber);
+                    var message = response is null
+                        ? "Response was null."
+                        : $"Unexpected response. Status: {response.Status}, URL: {response.Url}";
+
+                    errors.Add(new DiscoveryError(url, message));
                     break;
                 }
 
                 var items = await page.Locator(ItemSelector).AllAsync();
+
+                // No posts found on this page — stop pagination.
                 if (items.Count == 0) break;
 
-                var (foundDuplicate, newDocs) = await ProcessPageAsync(items, pageNumber, cancellationToken);
-                if (newDocs.Count == 0 || foundDuplicate) break;
-
+                var (foundDuplicate, newDocs, pageErrors) =
+                    await ExtractDocumentsFromPageAsync(items, cancellationToken);
+                errors.AddRange(pageErrors);
                 discovered.AddRange(newDocs);
+
+                // Stop if a previously seen document is found (we've caught up).
+                if (foundDuplicate) break;
+
                 pageNumber++;
             }
-
-            return discovered.Count == 0
-                ? null
-                : new DocumentDiscovered
-                {
-                    DocumentCategory = DocumentCategoryType.PresidentialAction,
-                    Documents = discovered
-                };
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error during document discovery.");
-            return null;
+            errors.Add(new DiscoveryError(BaseUrl, $"Unhandled exception: {ex.Message}"));
         }
         finally
         {
             if (page is not null)
                 await browserService.ClosePageAsync(page);
         }
+
+        return new DiscoveryResult(
+            DocumentCategoryType.PresidentialAction,
+            discovered,
+            errors
+        );
     }
 
-    private void HandleInvalidResponse(IResponse? response, int pageNumber)
+    private async Task<(bool FoundDuplicate, List<DocumentInfo> NewDocuments, List<DiscoveryError> Errors)>
+        ExtractDocumentsFromPageAsync(IReadOnlyList<ILocator> items, CancellationToken cancellationToken)
     {
-        if (response is null)
-        {
-            logger.LogError("Page {PageNumber}: response was null.", pageNumber);
-            return;
-        }
-
-        if (pageNumber == 1)
-        {
-            logger.LogError("Failed to load first page. Status: {Status}.", response.Status);
-            return;
-        }
-
-        if (response.Status == 404) return;
-
-        logger.LogWarning(
-            "Unexpected status code on page {PageNumber}. Status: {Status}, URL: {Url}.",
-            pageNumber, response.Status, response.Url);
-    }
-
-    private async Task<(bool FoundDuplicate, List<DocumentInfo> NewDocuments)> ProcessPageAsync(
-        IReadOnlyList<ILocator> items,
-        int pageNumber,
-        CancellationToken cancellationToken)
-    {
-        var documents = await ExtractDocumentsAsync(items, pageNumber);
-        return documents.Count == 0
-            ? (false, [])
-            : await FilterDuplicatesAsync(documents, cancellationToken);
-    }
-
-    private async Task<List<DocumentInfo>> ExtractDocumentsAsync(
-        IReadOnlyList<ILocator> items,
-        int pageNumber)
-    {
-        var documents = new List<DocumentInfo>();
         var baseUri = new Uri(BaseUrl);
+        var documents = new List<DocumentInfo>();
+        var errors = new List<DiscoveryError>();
 
         foreach (var item in items)
         {
@@ -117,21 +95,25 @@ internal class PresidentialActionStrategy(
 
             if (string.IsNullOrWhiteSpace(link) || string.IsNullOrWhiteSpace(title))
             {
-                logger.LogWarning("Invalid item: missing title or link on page {PageNumber}.", pageNumber);
+                errors.Add(new DiscoveryError(link ?? "unknown", "Document link or title is missing."));
                 continue;
             }
 
             if (Uri.TryCreate(baseUri, link, out var fullUrl))
                 documents.Add(new DocumentInfo(fullUrl.ToString(), title));
             else
-                logger.LogWarning(
-                    "Failed to resolve document URL: base '{Base}' + relative '{Relative}' on page {PageNumber}.",
-                    BaseUrl, link, pageNumber);
+                errors.Add(new DiscoveryError(link, "Invalid URL format."));
         }
 
-        return documents;
+        if (documents.Count == 0)
+            return (false, [], errors);
+
+        var (foundDuplicate, newDocs) = await FilterDuplicatesAsync(documents, cancellationToken);
+        return (foundDuplicate, newDocs, errors);
     }
 
+    // Filter out any documents already seen in the database.
+    // Stop immediately if a duplicate is found (we assume all newer items have been processed).
     private async Task<(bool FoundDuplicate, List<DocumentInfo> NewDocuments)> FilterDuplicatesAsync(
         List<DocumentInfo> docs,
         CancellationToken cancellationToken)
@@ -148,7 +130,6 @@ internal class PresidentialActionStrategy(
 
         foreach (var doc in docs)
         {
-            // Exit early upon finding the first existing document
             if (existingSet.Contains(doc.Url))
                 return (true, newDocs);
 
