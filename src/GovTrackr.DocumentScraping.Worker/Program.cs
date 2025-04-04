@@ -1,4 +1,4 @@
-using GovTrackr.ScrapingService.Configurations.Extensions;
+using GovTrackr.DocumentScraping.Worker.Configurations.Extensions;
 using GovTrackr.ServiceDefaults;
 
 var builder = Host.CreateApplicationBuilder(args);

@@ -1,6 +1,6 @@
 ﻿using Shared.MessageContracts;
 
-namespace GovTrackr.ScrapingService.Abstractions;
+namespace GovTrackr.DocumentScraping.Worker.Application.Interfaces;
 
 internal interface IScrapingService
 {

@@ -1,6 +1,6 @@
 ﻿using Shared.Domain.PresidentialAction;
 
-namespace GovTrackr.ScrapingService.Infrastructure.Scrapers.Models;
+namespace GovTrackr.DocumentScraping.Worker.Infrastructure.Scrapers.Models;
 
 internal record ScrapingResult
 {

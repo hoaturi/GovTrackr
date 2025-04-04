@@ -1,7 +1,8 @@
-﻿using GovTrackr.ScrapingService.Abstractions;
-using GovTrackr.ScrapingService.Configurations.Options;
-using GovTrackr.ScrapingService.Infrastructure.Converters;
-using GovTrackr.ScrapingService.Infrastructure.Scrapers;
+﻿using GovTrackr.DocumentScraping.Worker.Application.Interfaces;
+using GovTrackr.DocumentScraping.Worker.Configurations.Options;
+using GovTrackr.DocumentScraping.Worker.Infrastructure.Converters;
+using GovTrackr.DocumentScraping.Worker.Infrastructure.Scrapers;
+using GovTrackr.DocumentScraping.Worker.Services;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -11,7 +12,7 @@ using Shared.Infrastructure.Browser;
 using Shared.Infrastructure.Persistence.Context;
 using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
 
-namespace GovTrackr.ScrapingService.Configurations.Extensions;
+namespace GovTrackr.DocumentScraping.Worker.Configurations.Extensions;
 
 internal static class ServiceExtensions
 {
@@ -22,7 +23,7 @@ internal static class ServiceExtensions
             .AddMassTransit()
             // .AddScrapingService()
             .AddPresidentialActionScraper()
-            .AddHostedService<Services.ScrapingService>()
+            .AddHostedService<ScrapingService>()
             .AddHtmlToMarkdownConverter()
             .AddPlaywright();
 
@@ -73,7 +74,7 @@ internal static class ServiceExtensions
 
     private static IServiceCollection AddScrapingService(this IServiceCollection services)
     {
-        services.AddSingleton<IScrapingService, Services.ScrapingService>();
+        services.AddSingleton<IScrapingService, ScrapingService>();
         return services;
     }
 

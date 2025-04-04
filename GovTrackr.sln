@@ -14,7 +14,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovTrackr.MigrationService"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovTrackr.Shared", "src\GovTrackr.Shared\GovTrackr.Shared.csproj", "{3C2E6911-9D9D-4FAA-8861-35D66AF2DB35}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovTrackr.ScrapingService", "src\GovTrackr.ScrapingService\GovTrackr.ScrapingService.csproj", "{8983096D-31A3-497D-834A-272A7C572F29}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovTrackr.DocumentScraping.Worker", "src\GovTrackr.DocumentScraping.Worker\GovTrackr.DocumentScraping.Worker.csproj", "{8983096D-31A3-497D-834A-272A7C572F29}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovTrackr.DocumentDiscovery.Functions", "src\GovTrackr.DocumentDiscovery.Functions\GovTrackr.DocumentDiscovery.Functions.csproj", "{E07C7274-AC9D-44BC-BEE8-383D197C538A}"
 EndProject

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GovTrackr.ScrapingService.Configurations.Options;
+namespace GovTrackr.DocumentScraping.Worker.Configurations.Options;
 
 internal class ConnectionStringsOptions
 {

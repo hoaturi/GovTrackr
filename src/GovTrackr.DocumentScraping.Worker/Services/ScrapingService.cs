@@ -1,8 +1,8 @@
-﻿using GovTrackr.ScrapingService.Abstractions;
+﻿using GovTrackr.DocumentScraping.Worker.Application.Interfaces;
 using Shared.Domain.Common;
 using Shared.MessageContracts;
 
-namespace GovTrackr.ScrapingService.Services;
+namespace GovTrackr.DocumentScraping.Worker.Services;
 
 internal class ScrapingService(
     IServiceProvider serviceProvider
