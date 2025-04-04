@@ -8,29 +8,30 @@ using Microsoft.Playwright;
 using Shared.Abstractions.Browser;
 using Shared.Domain.Common;
 using Shared.Domain.PresidentialAction;
-using Shared.Infrastructure.Persistence.Context;
 using Shared.MessageContracts;
 
 namespace GovTrackr.DocumentScraping.Worker.Infrastructure.Scrapers;
 
 internal class PresidentialActionScraper(
-    AppDbContext dbContext,
     ILogger<PresidentialActionScraper> logger,
     IHtmlConverter markdownConverter,
     IBrowserService browserService,
     IOptions<ScrapersOptions> options
-)
-    : IScraper
+) : IScraper
 {
     private const string CategorySelector = ".wp-block-whitehouse-byline-subcategory__link";
     private const string DateSelector = ".wp-block-post-date time";
     private const string ContentContainerSelector = ".entry-content.wp-block-post-content";
 
-    public async Task ScrapeAsync(List<DocumentInfo> documents, CancellationToken cancellationToken)
+    public async Task<ScrapingResult> ScrapeAsync(List<DocumentInfo> documents, CancellationToken cancellationToken)
     {
-        if (documents.Count == 0) return;
-
         var result = new ScrapingResult();
+
+        if (documents.Count == 0)
+        {
+            logger.LogWarning("No documents to scrape.");
+            return result;
+        }
 
         // Use Semaphore to limit concurrent browser page usage
         using var semaphore = new SemaphoreSlim(options.Value.MaxConcurrentPages);
@@ -77,21 +78,7 @@ internal class PresidentialActionScraper(
         result.Successful.AddRange(successfulDocs);
         foreach (var failure in failureList) result.Failures.Add(failure);
 
-        // Save successful documents to database
-        if (result.Successful.Count > 0)
-        {
-            await dbContext.PresidentialActions.AddRangeAsync(result.Successful, cancellationToken);
-            await dbContext.SaveChangesAsync(cancellationToken);
-
-            logger.LogInformation("Successfully scraped and saved {Count} of {TotalCount} documents",
-                result.Successful.Count, documents.Count);
-        }
-
-        if (result.Failures.Count > 0)
-            logger.LogWarning("Failed to scrape {FailureCount} of {TotalCount} documents: {@Failures}",
-                result.Failures.Count,
-                documents.Count,
-                result.Failures.Select(f => new { f.Message }));
+        return result;
     }
 
     // Scrape a single document and return either a populated entity or error message
