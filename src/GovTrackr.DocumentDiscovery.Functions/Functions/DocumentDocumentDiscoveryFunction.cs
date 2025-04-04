@@ -1,4 +1,5 @@
 ﻿using GovTrackr.DocumentDiscovery.Functions.Application.Interfaces;
+using MassTransit;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
@@ -6,11 +7,13 @@ namespace GovTrackr.DocumentDiscovery.Functions.Functions;
 
 internal class DocumentDocumentDiscoveryFunction(
     IEnumerable<IDocumentDiscoveryStrategy> strategies,
+    IPublishEndpoint publishEndpoint,
     ILogger<DocumentDocumentDiscoveryFunction> logger
 ) : IDocumentDiscoveryFunction
 {
     [Function("DocumentDiscovery")]
     public async Task RunAsync(
+        // TODO: Need to change the interval on production
         [TimerTrigger("*/30 * * * * *")] TimerInfo timerInfo,
         CancellationToken cancellationToken)
     {
@@ -43,10 +46,20 @@ internal class DocumentDocumentDiscoveryFunction(
         var result = await strategy.DiscoverDocumentsAsync(cancellationToken);
 
         if (result is not null && result.Urls.Count != 0)
+        {
             logger.LogInformation("Strategy {StrategyName} discovered {Count} new documents.", strategyName,
                 result.Urls.Count);
+
+            await publishEndpoint.Publish(result, cancellationToken);
+
+            logger.LogInformation("Published {Count} new documents from strategy {StrategyName}.", result.Urls.Count,
+                strategyName);
+        }
+
         else
+        {
             logger.LogInformation("Strategy {StrategyName} found no new documents or failed.", strategyName);
+        }
 
         logger.LogInformation("Completed discovery strategy: {StrategyName}", strategyName);
     }
