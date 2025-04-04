@@ -9,18 +9,18 @@ using Shared.MessageContracts;
 
 namespace GovTrackr.DocumentDiscovery.Functions.Infrastructure.Strategies;
 
-public class PresidentialActionStrategy(
+internal class PresidentialActionStrategy(
     AppDbContext dbContext,
     IBrowserService browserService,
     ILogger<PresidentialActionStrategy> logger)
-    : IDiscoveryStrategy
+    : IDocumentDiscoveryStrategy
 {
     private const string BaseSourceUrl = "https://www.whitehouse.gov/presidential-actions/";
     private const string LinkSelector = "ul.wp-block-post-template li h2.wp-block-post-title a";
     private const int MaxRetryAttempts = 2;
     private const int InitialRetryDelay = 1000;
 
-    public async Task<DocumentDiscovered?> DiscoverAsync(CancellationToken cancellationToken)
+    public async Task<DocumentDiscovered?> DiscoverDocumentsAsync(CancellationToken cancellationToken)
     {
         var allNewLinksDiscovered = new List<string>();
         var pageNumber = 1;

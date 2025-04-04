@@ -5,12 +5,12 @@ using Microsoft.Extensions.Logging;
 namespace GovTrackr.DocumentDiscovery.Functions.Functions;
 
 internal class DocumentDocumentDiscoveryFunction(
-    IEnumerable<IDiscoveryStrategy> strategies,
+    IEnumerable<IDocumentDiscoveryStrategy> strategies,
     ILogger<DocumentDocumentDiscoveryFunction> logger
 ) : IDocumentDiscoveryFunction
 {
     [Function("DocumentDiscovery")]
-    public async Task DiscoverDocumentsAsync(
+    public async Task RunAsync(
         [TimerTrigger("*/30 * * * * *")] TimerInfo timerInfo,
         CancellationToken cancellationToken)
     {
@@ -23,7 +23,7 @@ internal class DocumentDocumentDiscoveryFunction(
         logger.LogInformation("Starting document discovery using {StrategyCount} strategies.", strategies.Count());
 
         var discoveryTasks = strategies
-            .Select(strategy => ExecuteDiscoveryStrategyAsync(strategy, cancellationToken))
+            .Select(strategy => ExecuteStrategyAsync(strategy, cancellationToken))
             .ToList();
 
         await Task.WhenAll(discoveryTasks);
@@ -31,8 +31,8 @@ internal class DocumentDocumentDiscoveryFunction(
         logger.LogInformation("Finished document discovery cycle.");
     }
 
-    private async Task ExecuteDiscoveryStrategyAsync(
-        IDiscoveryStrategy strategy,
+    private async Task ExecuteStrategyAsync(
+        IDocumentDiscoveryStrategy strategy,
         CancellationToken cancellationToken
     )
     {
@@ -40,7 +40,7 @@ internal class DocumentDocumentDiscoveryFunction(
 
         logger.LogInformation("Executing discovery strategy: {StrategyName}", strategyName);
 
-        var result = await strategy.DiscoverAsync(cancellationToken);
+        var result = await strategy.DiscoverDocumentsAsync(cancellationToken);
 
         if (result is not null && result.Urls.Count != 0)
             logger.LogInformation("Strategy {StrategyName} discovered {Count} new documents.", strategyName,

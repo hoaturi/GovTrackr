@@ -4,5 +4,5 @@ namespace GovTrackr.DocumentDiscovery.Functions.Application.Interfaces;
 
 internal interface IDocumentDiscoveryFunction
 {
-    Task DiscoverDocumentsAsync(TimerInfo timerInfo, CancellationToken cancellationToken);
+    Task RunAsync(TimerInfo timerInfo, CancellationToken cancellationToken);
 }

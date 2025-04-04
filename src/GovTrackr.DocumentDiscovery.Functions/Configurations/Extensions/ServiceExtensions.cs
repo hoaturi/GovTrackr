@@ -81,7 +81,7 @@ internal static class ServiceExtensions
 
     private static IServiceCollection AddDiscoveryStrategies(this IServiceCollection services)
     {
-        services.AddScoped<IDiscoveryStrategy, PresidentialActionStrategy>();
+        services.AddScoped<IDocumentDiscoveryStrategy, PresidentialActionStrategy>();
 
         return services;
     }
