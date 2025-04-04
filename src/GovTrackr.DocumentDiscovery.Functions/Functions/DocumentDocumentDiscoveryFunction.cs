@@ -13,16 +13,16 @@ internal class DocumentDocumentDiscoveryFunction(
 {
     [Function("DocumentDiscovery")]
     public async Task RunAsync(
-        [TimerTrigger("0 */5 * * * *")] TimerInfo timerInfo,
+        [TimerTrigger("*/10 * * * * *")] TimerInfo timerInfo,
         CancellationToken cancellationToken)
     {
         if (!strategies.Any())
         {
-            logger.LogWarning("No discovery strategies registered.");
+            logger.LogError("No document discovery strategies are registered.");
             return;
         }
 
-        logger.LogInformation("Starting document discovery using {StrategyCount} strategies.", strategies.Count());
+        logger.LogInformation("Starting document discovery.");
 
         var discoveryTasks = strategies
             .Select(strategy => ExecuteStrategyAsync(strategy, cancellationToken))
@@ -30,7 +30,7 @@ internal class DocumentDocumentDiscoveryFunction(
 
         await Task.WhenAll(discoveryTasks);
 
-        logger.LogInformation("Finished document discovery cycle.");
+        logger.LogInformation("Document discovery completed.");
     }
 
     private async Task ExecuteStrategyAsync(
@@ -40,26 +40,14 @@ internal class DocumentDocumentDiscoveryFunction(
     {
         var strategyName = strategy.GetType().Name;
 
-        logger.LogInformation("Executing discovery strategy: {StrategyName}", strategyName);
-
         var result = await strategy.DiscoverDocumentsAsync(cancellationToken);
 
-        if (result is not null && result.Documents.Count != 0)
+        if (result?.Documents.Count > 0)
         {
-            logger.LogInformation("Strategy {StrategyName} discovered {Count} new documents.", strategyName,
-                result.Documents.Count);
+            logger.LogInformation("{StrategyName} discovered and published {Count} new document(s).",
+                strategyName, result.Documents.Count);
 
             await publishEndpoint.Publish(result, cancellationToken);
-
-            logger.LogInformation("Published {Count} new documents from strategy {StrategyName}.",
-                result.Documents.Count,
-                strategyName);
         }
-        else
-        {
-            logger.LogInformation("Strategy {StrategyName} found no new documents.", strategyName);
-        }
-
-        logger.LogInformation("Completed discovery strategy: {StrategyName}", strategyName);
     }
 }
