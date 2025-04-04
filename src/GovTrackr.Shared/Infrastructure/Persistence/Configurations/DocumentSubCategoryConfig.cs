@@ -49,6 +49,13 @@ public class DocumentSubCategoryConfig : IEntityTypeConfiguration<DocumentSubCat
                 Name = "Proclamation",
                 Slug = "proclamation",
                 CategoryId = (int)DocumentCategoryType.PresidentialAction
+            },
+            new DocumentSubCategory
+            {
+                Id = (int)DocumentSubCategoryType.Nomination,
+                Name = "Nomination",
+                Slug = "nomination",
+                CategoryId = (int)DocumentCategoryType.PresidentialAction
             }
         );
     }

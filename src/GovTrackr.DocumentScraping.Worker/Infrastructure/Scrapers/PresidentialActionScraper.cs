@@ -140,6 +140,7 @@ internal class PresidentialActionScraper(
             "Executive Orders" => DocumentSubCategoryType.ExecutiveOrder,
             "Presidential Memoranda" => DocumentSubCategoryType.Memoranda,
             "Proclamations" => DocumentSubCategoryType.Proclamation,
+            "Nominations & Appointments" => DocumentSubCategoryType.Nomination,
             _ => null
         };
     }

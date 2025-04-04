@@ -14,5 +14,6 @@ public enum DocumentSubCategoryType
 {
     ExecutiveOrder = 1,
     Memoranda = 2,
-    Proclamation = 3
+    Proclamation = 3,
+    Nomination = 4
 }
