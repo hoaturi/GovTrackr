@@ -36,7 +36,28 @@ internal class PresidentialActionStrategy(
                 logger.LogInformation("Processing page {PageNumber}: {Url}", pageNumber, currentPageUrl);
 
                 var response = await NavigateToPageWithRetryAsync(page, currentPageUrl, pageNumber, cancellationToken);
-                if (response is not { Ok: true }) return null;
+
+                if (response is null)
+                {
+                    logger.LogWarning("Navigation failed after retries for page {PageNumber}.", pageNumber);
+                    return null;
+                }
+
+                if (!response.Ok)
+                {
+                    // Check if it's a common end-of-pagination indicator 
+                    if (response.Status == 404 && pageNumber > 1)
+                    {
+                        logger.LogInformation("Received 404 on page {PageNumber}, assuming end of pagination.",
+                            pageNumber);
+                        break;
+                    }
+
+                    // Unexpected non-Ok status, or failure on page 1 - treat as strategy failure
+                    logger.LogWarning("Navigation returned non-OK status {Status} on page {PageNumber}.",
+                        response.Status, pageNumber);
+                    return null;
+                }
 
                 var linksOnCurrentPage = await page.Locator(LinkSelector).AllAsync();
                 if (!linksOnCurrentPage.Any())
@@ -58,6 +79,9 @@ internal class PresidentialActionStrategy(
 
                 pageNumber++;
             }
+
+            logger.LogInformation("Discovered {Count} new links from page {PageNumber}.", allNewLinksDiscovered.Count,
+                pageNumber);
 
             return new DocumentDiscovered
             {
