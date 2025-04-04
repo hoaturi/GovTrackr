@@ -25,6 +25,9 @@ public class PresidentialActionConfig : IEntityTypeConfiguration<PresidentialAct
         builder.Property(p => p.TranslationStatus)
             .IsRequired();
 
+        builder.HasIndex(p => p.SourceUrl)
+            .IsUnique();
+
         builder.HasOne(p => p.SubCategory)
             .WithMany()
             .HasForeignKey(p => p.SubCategoryId)
