@@ -13,8 +13,7 @@ internal class DocumentDocumentDiscoveryFunction(
 {
     [Function("DocumentDiscovery")]
     public async Task RunAsync(
-        // TODO: Need to change the interval on production
-        [TimerTrigger("*/30 * * * * *")] TimerInfo timerInfo,
+        [TimerTrigger("0 */5 * * * *")] TimerInfo timerInfo,
         CancellationToken cancellationToken)
     {
         if (!strategies.Any())
