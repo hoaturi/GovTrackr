@@ -200,11 +200,10 @@ internal class PresidentialActionScraper(
     private static async Task<DateTime?> ExtractDateTimeInUtcAsync(IPage page)
     {
         var element = page.Locator(DateSelector);
-        if (await element.CountAsync() == 0) return null;
 
         var dateAttribute = await element.GetAttributeAsync("datetime");
         if (!string.IsNullOrWhiteSpace(dateAttribute) && DateTime.TryParse(dateAttribute, out var parsedDate))
-            return parsedDate;
+            return parsedDate.ToUniversalTime();
 
         return null;
     }
