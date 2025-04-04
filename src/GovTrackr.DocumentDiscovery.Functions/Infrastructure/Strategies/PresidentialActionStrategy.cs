@@ -16,13 +16,13 @@ internal class PresidentialActionStrategy(
     : IDocumentDiscoveryStrategy
 {
     private const string BaseSourceUrl = "https://www.whitehouse.gov/presidential-actions/";
-    private const string LinkSelector = "ul.wp-block-post-template li h2.wp-block-post-title a";
-    private const int MaxRetryAttempts = 2;
-    private const int InitialRetryDelay = 1000;
+    private const string ItemSelector = "ul.wp-block-post-template li";
+    private const string TitleSelector = "h2.wp-block-post-title";
+    private const string LinkSelectorWithinItem = $"{TitleSelector} a";
 
     public async Task<DocumentDiscovered?> DiscoverDocumentsAsync(CancellationToken cancellationToken)
     {
-        var allNewLinksDiscovered = new List<string>();
+        var discoveredDocuments = new List<DocumentInfo>();
         var pageNumber = 1;
         IPage? page = null;
 
@@ -30,22 +30,17 @@ internal class PresidentialActionStrategy(
         {
             page = await browserService.GetPageAsync();
 
+            // Paginate through all the list of documents until we reach the end
             while (!cancellationToken.IsCancellationRequested)
             {
-                var currentPageUrl = pageNumber == 1 ? BaseSourceUrl : $"{BaseSourceUrl}page/{pageNumber}/";
-                logger.LogInformation("Processing page {PageNumber}: {Url}", pageNumber, currentPageUrl);
+                var url = pageNumber == 1 ? BaseSourceUrl : $"{BaseSourceUrl}page/{pageNumber}/";
+                logger.LogInformation("Processing page {PageNumber}: {Url}", pageNumber, url);
 
-                var response = await NavigateToPageWithRetryAsync(page, currentPageUrl, pageNumber, cancellationToken);
+                var response = await page.GotoAsync(url);
 
-                if (response is null)
+                if (response is { Ok: false })
                 {
-                    logger.LogWarning("Navigation failed after retries for page {PageNumber}.", pageNumber);
-                    return null;
-                }
-
-                if (!response.Ok)
-                {
-                    // Check if it's a common end-of-pagination indicator 
+                    // If the page is not found (404) and it's not the first page, assume pagination is done
                     if (response.Status == 404 && pageNumber > 1)
                     {
                         logger.LogInformation("Received 404 on page {PageNumber}, assuming end of pagination.",
@@ -53,45 +48,58 @@ internal class PresidentialActionStrategy(
                         break;
                     }
 
-                    // Unexpected non-Ok status, or failure on page 1 - treat as strategy failure
                     logger.LogWarning("Navigation returned non-OK status {Status} on page {PageNumber}.",
                         response.Status, pageNumber);
-                    return null;
-                }
 
-                var linksOnCurrentPage = await page.Locator(LinkSelector).AllAsync();
-                if (!linksOnCurrentPage.Any())
-                {
-                    logger.LogInformation("No links found on page {PageNumber}, stopping pagination.", pageNumber);
+                    // Critical if failed on the first page — discovery can't continue
+                    if (pageNumber == 1)
+                    {
+                        logger.LogError("Failed to load the first page. Aborting discovery.");
+                        return null;
+                    }
+
                     break;
                 }
 
-                var (foundDuplicate, newLinks) =
-                    await ProcessLinksOnPageAsync(linksOnCurrentPage, pageNumber, cancellationToken);
-                allNewLinksDiscovered.AddRange(newLinks);
+                // Get all the list items on the page
+                var items = await page.Locator(ItemSelector).AllAsync();
+                if (!items.Any())
+                {
+                    logger.LogInformation("No items found on page {PageNumber}. Ending pagination.", pageNumber);
+                    break;
+                }
 
+                // Extract and process the documents
+                var (foundDuplicate, newDocs) = await ProcessPageItemsAsync(items, pageNumber, cancellationToken);
+                if (newDocs.Count == 0)
+                {
+                    logger.LogInformation("No new documents found on page {PageNumber}. Ending pagination.",
+                        pageNumber);
+                    break;
+                }
+
+                discoveredDocuments.AddRange(newDocs);
+
+                // Stop pagination if duplicates are found
                 if (foundDuplicate)
                 {
-                    logger.LogInformation("Duplicate link encountered on page {PageNumber}, stopping pagination.",
-                        pageNumber);
+                    logger.LogInformation("Duplicate found on page {PageNumber}. Ending pagination.", pageNumber);
                     break;
                 }
 
                 pageNumber++;
             }
 
-            logger.LogInformation("Discovered {Count} new links from page {PageNumber}.", allNewLinksDiscovered.Count,
-                pageNumber);
-
+            logger.LogInformation("Finished discovery. Discovered {Count} new documents.", discoveredDocuments.Count);
             return new DocumentDiscovered
             {
                 DocumentCategory = DocumentCategoryType.PresidentialAction,
-                Urls = allNewLinksDiscovered
+                Documents = discoveredDocuments
             };
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred during the discovery process: {Message}", ex.Message);
+            logger.LogError(ex, "An error occurred during the discovery process.");
             return null;
         }
         finally
@@ -100,103 +108,80 @@ internal class PresidentialActionStrategy(
         }
     }
 
-    private async Task<IResponse?> NavigateToPageWithRetryAsync(
-        IPage page,
-        string url,
+    // Processes all items on the page, extracting and filtering for duplicates
+    private async Task<(bool FoundDuplicate, List<DocumentInfo> NewDocuments)> ProcessPageItemsAsync(
+        IReadOnlyList<ILocator> items,
         int pageNumber,
         CancellationToken cancellationToken)
     {
-        var retryCount = 0;
-        var delay = InitialRetryDelay;
+        var docs = await ExtractDocumentsAsync(items, pageNumber);
 
-        while (retryCount < MaxRetryAttempts)
+        if (docs.Count == 0) return (false, []);
+
+        var (foundDuplicate, newDocuments) = await FilterDuplicatesAsync(docs, cancellationToken);
+        return foundDuplicate ? (true, newDocuments) : (false, newDocuments);
+    }
+
+    // Extracts document info (URL + title) from list items on current page
+    private async Task<List<DocumentInfo>> ExtractDocumentsAsync(
+        IReadOnlyList<ILocator> items,
+        int pageNumber)
+    {
+        var documents = new List<DocumentInfo>();
+        var baseUri = new Uri(BaseSourceUrl);
+
+        foreach (var item in items)
         {
-            var response = await page.GotoAsync(url, new PageGotoOptions
-            {
-                WaitUntil = WaitUntilState.DOMContentLoaded
-            });
+            var link = await item.Locator(LinkSelectorWithinItem).GetAttributeAsync("href");
+            var title = (await item.Locator(TitleSelector).InnerTextAsync()).Trim();
 
-            if (response is { Status: >= 500 })
+            if (string.IsNullOrWhiteSpace(link))
             {
-                logger.LogWarning(
-                    "Retry {RetryCount}/{MaxRetries}: Server error {Status} on page {PageNumber}. Retrying in {Delay}ms...",
-                    retryCount + 1, MaxRetryAttempts, response.Status, pageNumber, delay);
-
-                await Task.Delay(delay, cancellationToken);
-                delay *= 2; // Exponential backoff
-                retryCount++;
+                logger.LogWarning("Missing href in item on page {PageNumber}.", pageNumber);
+                continue;
             }
+
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                logger.LogWarning("Missing title in item (URL: {Url}) on page {PageNumber}.", link, pageNumber);
+                continue;
+            }
+
+            if (Uri.TryCreate(baseUri, link, out var absoluteUri))
+                documents.Add(new DocumentInfo(absoluteUri.ToString(), title));
             else
-            {
-                return response; // Success
-            }
+                logger.LogWarning("Invalid URI with base {Base} and relative {Relative} on item, page {PageNumber}.",
+                    BaseSourceUrl, link, pageNumber);
         }
 
-        logger.LogWarning("Page {PageNumber} failed after retries, stopping pagination.", pageNumber);
-        return null;
+        return documents;
     }
 
-    private async Task<(bool FoundDuplicate, List<string> NewLinks)> ProcessLinksOnPageAsync(
-        IReadOnlyList<ILocator> linksOnCurrentPage,
-        int pageNumber,
+    // Filters out documents that already exist in the database, and stop pagination if duplicates are found
+    private async Task<(bool FoundDuplicate, List<DocumentInfo> NewDocuments)> FilterDuplicatesAsync(
+        List<DocumentInfo> docs,
         CancellationToken cancellationToken)
     {
-        var hrefs = await ExtractHrefsAsync(linksOnCurrentPage);
+        var urls = docs.Select(d => d.Url).ToList();
 
-        if (hrefs.Count == 0)
-        {
-            logger.LogWarning("No href attributes found on page {PageNumber}.", pageNumber);
-            return (false, []);
-        }
+        if (urls.Count == 0) return (false, []);
 
-        // Convert to absolute URLs and filter out null/empty values
-        var absoluteUrls = ConvertToAbsoluteUrls(hrefs);
-
-        if (absoluteUrls.Count != 0) return await CheckForDuplicatesAsync(absoluteUrls, cancellationToken);
-
-        logger.LogWarning("No valid href attributes found on page {PageNumber}.", pageNumber);
-        return (false, []);
-    }
-
-    private static async Task<List<string>> ExtractHrefsAsync(IReadOnlyList<ILocator> linksOnCurrentPage)
-    {
-        // Fetch href attributes in parallel
-        var hrefTasks = linksOnCurrentPage.Select(link => link.GetAttributeAsync("href")).ToList();
-        var hrefs = await Task.WhenAll(hrefTasks);
-        return hrefs.OfType<string>().ToList();
-    }
-
-    private static List<string> ConvertToAbsoluteUrls(List<string> hrefs)
-    {
-        return hrefs
-            .Select(href => Uri.TryCreate(new Uri(BaseSourceUrl), href, out var uri) ? uri.ToString() : null)
-            .OfType<string>()
-            .ToList();
-    }
-
-    private async Task<(bool FoundDuplicate, List<string> NewLinks)> CheckForDuplicatesAsync(
-        List<string> absoluteUrls,
-        CancellationToken cancellationToken)
-    {
         var existingUrls = await dbContext.PresidentialActions.AsNoTracking()
-            .Where(pa => absoluteUrls.Contains(pa.SourceUrl))
+            .Where(pa => urls.Contains(pa.SourceUrl))
             .Select(pa => pa.SourceUrl)
             .ToListAsync(cancellationToken);
 
-        var newLinks = new List<string>();
-        var foundDuplicate = false;
+        var newDocs = new List<DocumentInfo>();
+        var existingSet = new HashSet<string>(existingUrls);
 
-        foreach (var url in absoluteUrls)
+        foreach (var doc in docs)
         {
-            if (existingUrls.Contains(url))
-            {
-                foundDuplicate = true;
-                break;
-            }
+            if (existingSet.Contains(doc.Url))
+                return (true, newDocs); // Stop immediately if a duplicate is found
 
-            newLinks.Add(url);
+            newDocs.Add(doc);
         }
 
-        return (foundDuplicate, newLinks);
+        return (false, newDocs);
     }
 }

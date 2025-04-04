@@ -1,6 +1,8 @@
-﻿namespace GovTrackr.DocumentScraping.Worker.Application.Interfaces;
+﻿using Shared.MessageContracts;
+
+namespace GovTrackr.DocumentScraping.Worker.Application.Interfaces;
 
 internal interface IScraper
 {
-    Task ScrapeAsync(List<string> urls, CancellationToken cancellationToken);
+    Task ScrapeAsync(List<DocumentInfo> documents, CancellationToken cancellationToken);
 }

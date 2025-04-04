@@ -45,17 +45,17 @@ internal class DocumentDocumentDiscoveryFunction(
 
         var result = await strategy.DiscoverDocumentsAsync(cancellationToken);
 
-        if (result is not null && result.Urls.Count != 0)
+        if (result is not null && result.Documents.Count != 0)
         {
             logger.LogInformation("Strategy {StrategyName} discovered {Count} new documents.", strategyName,
-                result.Urls.Count);
+                result.Documents.Count);
 
             await publishEndpoint.Publish(result, cancellationToken);
 
-            logger.LogInformation("Published {Count} new documents from strategy {StrategyName}.", result.Urls.Count,
+            logger.LogInformation("Published {Count} new documents from strategy {StrategyName}.",
+                result.Documents.Count,
                 strategyName);
         }
-
         else
         {
             logger.LogInformation("Strategy {StrategyName} found no new documents or failed.", strategyName);

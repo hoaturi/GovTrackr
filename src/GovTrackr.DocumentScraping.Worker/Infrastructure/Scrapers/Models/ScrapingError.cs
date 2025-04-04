@@ -1,6 +1,8 @@
-﻿namespace GovTrackr.DocumentScraping.Worker.Infrastructure.Scrapers.Models;
+﻿using Shared.MessageContracts;
+
+namespace GovTrackr.DocumentScraping.Worker.Infrastructure.Scrapers.Models;
 
 internal record ScrapingError(
-    string Url,
+    DocumentInfo Document,
     string Message
 );

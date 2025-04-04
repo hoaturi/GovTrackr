@@ -15,7 +15,7 @@ internal class DocumentDiscoveredConsumer(
     {
         var message = context.Message;
 
-        if (message.Urls.Count == 0)
+        if (message.Documents.Count == 0)
         {
             logger.LogWarning("Received DocumentDiscovered message with no URLs.");
             return;
@@ -24,14 +24,14 @@ internal class DocumentDiscoveredConsumer(
         var documentType = message.DocumentCategory;
 
         logger.LogInformation("Received DocumentDiscovered message for {DocumentType} with {UrlCount} URLs.",
-            documentType, message.Urls.Count);
+            documentType, message.Documents.Count);
 
         var scraper = GetScraper(documentType, serviceProvider);
 
         logger.LogInformation("Executing scraper {ScraperType} for category {Category}.",
             scraper.GetType().Name, message.DocumentCategory);
 
-        await scraper.ScrapeAsync(message.Urls, context.CancellationToken);
+        await scraper.ScrapeAsync(message.Documents, context.CancellationToken);
 
         logger.LogInformation("Successfully processed DocumentDiscovered message for category {Category}.",
             message.DocumentCategory);
