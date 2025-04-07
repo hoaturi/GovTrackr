@@ -7,14 +7,13 @@ public class HtmlToMarkdownConverter : IHtmlConverter
 {
     private readonly Converter _converter;
 
-    // Constructor: Initialize the ReverseMarkdown converter here
     public HtmlToMarkdownConverter()
     {
         var config = new Config
         {
             GithubFlavored = true,
             RemoveComments = true,
-            UnknownTags = Config.UnknownTagsOption.PassThrough
+            UnknownTags = Config.UnknownTagsOption.Drop
         };
 
         _converter = new Converter(config);
