@@ -110,7 +110,17 @@ internal class PresidentialActionScraper(
 
         var builder = new StringBuilder();
         for (var i = 0; i < count; i++)
-            builder.Append(await paragraphs.Nth(i).InnerHTMLAsync());
+        {
+            var html = await paragraphs.Nth(i).InnerHTMLAsync();
+
+            html = html
+                .Replace("<br>", "<br>\n")
+                .Replace("<br/>", "<br/>\n")
+                .Replace("<br />", "<br />\n")
+                .TrimStart();
+
+            builder.Append(html).Append("\n\n");
+        }
 
         return builder.ToString().Trim();
     }
