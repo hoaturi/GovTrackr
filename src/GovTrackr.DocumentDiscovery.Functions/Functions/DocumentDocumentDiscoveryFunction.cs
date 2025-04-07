@@ -14,7 +14,7 @@ internal class DocumentDocumentDiscoveryFunction(
 {
     [Function("DocumentDiscovery")]
     public async Task RunAsync(
-        [TimerTrigger("0 */5 * * * *")] TimerInfo timerInfo,
+        [TimerTrigger("*/30 * * * * *")] TimerInfo timerInfo,
         CancellationToken cancellationToken)
     {
         if (!strategies.Any())
@@ -43,17 +43,31 @@ internal class DocumentDocumentDiscoveryFunction(
             logger.LogWarning("[{StrategyName}] Discovery error at URL: {Url}. Message: {Message}",
                 strategyName, error.Url, error.Message);
 
-        if (result.DiscoveredDocuments.Count > 0)
-        {
-            var discoveredDocuments = new DocumentDiscovered
-            {
-                DocumentCategory = result.DocumentCategory,
-                Documents = result.DiscoveredDocuments
-            };
+        var totalCount = result.DiscoveredDocuments.Count;
 
-            await publishEndpoint.Publish(discoveredDocuments, cancellationToken);
-            logger.LogInformation("[{StrategyName}] Published {Count} new document(s).",
-                strategyName, result.DiscoveredDocuments.Count);
+        if (totalCount > 0)
+        {
+            var successCount = 0;
+
+            foreach (var discoveredDocument in result.DiscoveredDocuments.Select(document => new DocumentDiscovered
+                     {
+                         DocumentCategory = result.DocumentCategory,
+                         Document = document
+                     }))
+                try
+                {
+                    await publishEndpoint.Publish(discoveredDocument, cancellationToken);
+                    successCount++;
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex,
+                        "[{StrategyName}] Failed to publish document: {Title}",
+                        strategyName, discoveredDocument.Document.Title);
+                }
+
+            logger.LogInformation("[{StrategyName}] Successfully published {SuccessCount}/{TotalCount} document(s).",
+                strategyName, successCount, totalCount);
         }
         else
         {

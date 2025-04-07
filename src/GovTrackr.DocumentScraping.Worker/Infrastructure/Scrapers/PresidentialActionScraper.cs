@@ -1,8 +1,7 @@
 ﻿using System.Text;
+using FluentResults;
 using GovTrackr.DocumentScraping.Worker.Application.Interfaces;
-using GovTrackr.DocumentScraping.Worker.Configurations.Options;
 using GovTrackr.DocumentScraping.Worker.Infrastructure.Scrapers.Models;
-using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
 using Shared.Abstractions.Browser;
 using Shared.Domain.Common;
@@ -13,82 +12,55 @@ namespace GovTrackr.DocumentScraping.Worker.Infrastructure.Scrapers;
 
 internal class PresidentialActionScraper(
     IHtmlConverter markdownConverter,
-    IBrowserService browserService,
-    IOptions<ScrapersOptions> options
+    IBrowserService browserService
 ) : IScraper
 {
     private const string CategorySelector = ".wp-block-whitehouse-byline-subcategory__link";
     private const string DateSelector = ".wp-block-post-date time";
     private const string ContentContainerSelector = ".entry-content.wp-block-post-content";
 
-    public async Task<ScrapingResult> ScrapeAsync(List<DocumentInfo> documents, CancellationToken cancellationToken)
-    {
-        var result = new ScrapingResult();
-        if (documents.Count == 0) return result;
-
-        using var semaphore = new SemaphoreSlim(options.Value.MaxConcurrentPages);
-        var tasks = documents.Select(doc => ScrapeWithConcurrencyAsync(doc, semaphore, cancellationToken)).ToList();
-
-        var results = await Task.WhenAll(tasks);
-        foreach (var (action, error, url) in results)
-            if (action is not null)
-                result.Successful.Add(action);
-            else if (error is not null)
-                result.Failures.Add(new ScrapingError(url, error));
-
-        return result;
-    }
-
-    private async Task<(PresidentialAction? Action, string? Error, string Url)> ScrapeWithConcurrencyAsync(
-        DocumentInfo document,
-        SemaphoreSlim semaphore,
+    public async Task<Result<PresidentialAction>> ScrapeAsync(DocumentInfo document,
         CancellationToken cancellationToken)
     {
-        await semaphore.WaitAsync(cancellationToken);
         var page = await browserService.GetPageAsync();
 
         try
         {
-            var (action, error) = await ScrapeDocumentAsync(page, document);
-            return (action, error, document.Url);
-        }
-        catch (Exception ex)
-        {
-            return (null, ex.Message, document.Url);
+            var response = await page.GotoAsync(document.Url,
+                new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+            if (response is not { Ok: true })
+                throw new Exception($"Failed to load page: {response?.Status}");
+
+            
+            var category = await ExtractTextAsync(page, CategorySelector);
+            var contentHtml = await ExtractContentAsync(page);
+            if (string.IsNullOrEmpty(contentHtml))
+                return Result.Fail(new ScrapingError(document.Url, "Failed to extract content"));
+
+            var categoryType = ParseCategoryType(category, document.Title, contentHtml);
+            if (categoryType is null)
+                return Result.Fail(new ScrapingError(document.Url, "Failed to infer category"));
+
+            var publicationDate = await ExtractDateTimeInUtcAsync(page);
+            if (publicationDate is null)
+                return Result.Fail(new ScrapingError(document.Url, "Failed to extract publication date"));
+
+            var action = new PresidentialAction
+            {
+                SubCategoryId = (int)categoryType.Value,
+                Title = document.Title,
+                Content = markdownConverter.Convert(contentHtml),
+                SourceUrl = document.Url,
+                PublishedAt = publicationDate.Value,
+                TranslationStatus = TranslationStatus.Pending
+            };
+
+            return Result.Ok(action);
         }
         finally
         {
             await browserService.ClosePageAsync(page);
-            semaphore.Release();
         }
-    }
-
-    private async Task<(PresidentialAction? Action, string? ErrorMessage)> ScrapeDocumentAsync(IPage page,
-        DocumentInfo document)
-    {
-        var response =
-            await page.GotoAsync(document.Url, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
-        if (response is not { Ok: true }) return (null, "Failed to load page");
-
-        var category = await ExtractTextAsync(page, CategorySelector);
-        var contentHtml = await ExtractContentAsync(page);
-        if (string.IsNullOrEmpty(contentHtml)) return (null, "Failed to extract content");
-
-        var categoryType = ParseCategoryType(category, document.Title, contentHtml);
-        if (categoryType is null) return (null, "Failed to infer category");
-
-        var publicationDate = await ExtractDateTimeInUtcAsync(page);
-        if (publicationDate is null) return (null, "Failed to extract publication date");
-
-        return (new PresidentialAction
-        {
-            SubCategoryId = (int)categoryType.Value,
-            Title = document.Title,
-            Content = markdownConverter.Convert(contentHtml),
-            SourceUrl = document.Url,
-            PublishedAt = publicationDate.Value,
-            TranslationStatus = TranslationStatus.Pending
-        }, null);
     }
 
     private static async Task<string?> ExtractTextAsync(IPage page, string selector)
@@ -112,7 +84,6 @@ internal class PresidentialActionScraper(
         for (var i = 0; i < count; i++)
         {
             var html = await paragraphs.Nth(i).InnerHTMLAsync();
-
             html = html
                 .Replace("<br>", "<br>\n")
                 .Replace("<br/>", "<br/>\n")

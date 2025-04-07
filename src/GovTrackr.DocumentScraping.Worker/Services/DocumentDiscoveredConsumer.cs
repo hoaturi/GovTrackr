@@ -1,5 +1,5 @@
-﻿using GovTrackr.DocumentScraping.Worker.Application.Interfaces;
-using GovTrackr.DocumentScraping.Worker.Infrastructure.Scrapers.Models;
+﻿using FluentResults;
+using GovTrackr.DocumentScraping.Worker.Application.Interfaces;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Shared.Domain.Common;
@@ -19,107 +19,68 @@ internal class DocumentDiscoveredConsumer(
     {
         var message = context.Message;
         var cancellationToken = context.CancellationToken;
+        var category = message.DocumentCategory;
 
-        var categoryName = message.DocumentCategory.ToString();
+        var isDuplicate = await IsDuplicate(
+            message.Document,
+            category,
+            cancellationToken);
 
-        if (message.Documents.Count == 0)
-        {
-            logger.LogWarning("[{Category}] Received discovery message with no documents.", categoryName);
+        if (isDuplicate)
             return;
-        }
 
-        var newDocuments = await FilterNewDocumentsAsync(message.Documents, cancellationToken);
+        var scraper = GetScraper(category);
+        var scrapeResult = await scraper.ScrapeAsync(context.Message.Document, cancellationToken);
 
-        if (newDocuments.Count == 0)
-        {
-            logger.LogInformation("[{Category}] All {Total} documents already exist. Skipping scraping.",
-                categoryName, message.Documents.Count);
-            return;
-        }
-
-        logger.LogInformation("[{Category}] {NewCount} new document(s) out of {Total} will be scraped.",
-            categoryName, newDocuments.Count, message.Documents.Count);
-
-        var scraper = GetScraper(message.DocumentCategory);
-        var scrapeResult = await scraper.ScrapeAsync(message.Documents, cancellationToken);
-
-        await HandleScrapeResultAsync(scrapeResult, newDocuments.Count, message.DocumentCategory, cancellationToken);
+        await HandleScrapeResultAsync(scrapeResult, category, cancellationToken);
     }
 
-    private async Task<List<DocumentInfo>> FilterNewDocumentsAsync(
-        IReadOnlyCollection<DocumentInfo> incomingDocuments,
+    private async Task<bool> IsDuplicate(
+        DocumentInfo document,
+        DocumentCategoryType category,
         CancellationToken cancellationToken)
     {
-        var incomingUrls = incomingDocuments.Select(d => d.Url).ToList();
-
-        var existingUrls = await dbContext.PresidentialActions
+        var exists = await dbContext.PresidentialActions
             .AsNoTracking()
-            .Where(pa => incomingUrls.Contains(pa.SourceUrl))
-            .Select(pa => pa.SourceUrl)
-            .ToHashSetAsync(cancellationToken);
+            .AnyAsync(pa => pa.SourceUrl == document.Url, cancellationToken);
 
-        return incomingDocuments
-            .Where(d => !existingUrls.Contains(d.Url))
-            .ToList();
+        if (exists)
+            logger.LogInformation("[{Category}] Document already exists. Skipping scraping. Url: {Url}",
+                category.ToString(), document.Url);
+
+        return exists;
     }
 
     private async Task HandleScrapeResultAsync(
-        ScrapingResult result,
-        int attemptedCount,
+        Result<PresidentialAction> result,
         DocumentCategoryType category,
         CancellationToken cancellationToken)
     {
-        await SaveSuccessfulDocumentsAsync(result.Successful, category, cancellationToken);
-        LogScrapeFailures(result.Failures, attemptedCount, category);
+        if (result.IsSuccess)
+        {
+            await SaveSuccessfulDocumentAsync(result.Value, category, cancellationToken);
+        }
+        else
+        {
+            var error = result.Errors.First();
+            error.Metadata.TryGetValue("Url", out var url);
+
+            logger.LogWarning(
+                "[{Category}] Failed to scrape document from URL: {Url}. Error: {Error}",
+                category.ToString(), url, error.Message);
+        }
     }
 
-    private async Task SaveSuccessfulDocumentsAsync(
-        List<PresidentialAction> successfulDocuments,
+    private async Task SaveSuccessfulDocumentAsync(
+        PresidentialAction document,
         DocumentCategoryType category,
         CancellationToken cancellationToken)
     {
-        var successfulSaves = 0;
-        var failedSaves = 0;
-        var failedDetails = new List<(string Url, string Error)>();
+        await dbContext.PresidentialActions.AddAsync(document, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
 
-        foreach (var document in successfulDocuments)
-            try
-            {
-                await dbContext.PresidentialActions.AddAsync(document, cancellationToken);
-                await dbContext.SaveChangesAsync(cancellationToken);
-                successfulSaves++;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "[{Category}] Failed to save document from URL: {Url}", category,
-                    document.SourceUrl);
-                failedSaves++;
-                failedDetails.Add((document.SourceUrl, ex.Message));
-            }
-            finally
-            {
-                dbContext.Entry(document).State = EntityState.Detached;
-            }
-
-        if (successfulSaves > 0)
-            logger.LogInformation("[{Category}] Successfully saved {SuccessCount} document(s).",
-                category, successfulSaves);
-
-        if (failedSaves > 0)
-            logger.LogWarning("[{Category}] Failed to save {FailureCount} document(s). Details: {@Failures}",
-                category, failedSaves, failedDetails);
-    }
-
-    private void LogScrapeFailures(
-        List<ScrapingError> failures,
-        int totalAttempted,
-        DocumentCategoryType category)
-    {
-        if (failures.Count == 0) return;
-
-        logger.LogWarning(
-            "[{Category}] Scraping failed for {FailureCount} of {TotalCount} document(s).",
-            category, failures.Count, totalAttempted);
+        logger.LogInformation("[{Category}] Successfully saved document from URL: {Url}",
+            category.ToString(), document.SourceUrl);
     }
 
     private IScraper GetScraper(DocumentCategoryType category)

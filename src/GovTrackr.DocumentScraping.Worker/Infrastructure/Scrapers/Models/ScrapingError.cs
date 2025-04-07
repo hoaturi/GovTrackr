@@ -1,6 +1,11 @@
-﻿namespace GovTrackr.DocumentScraping.Worker.Infrastructure.Scrapers.Models;
+﻿using FluentResults;
 
-internal record ScrapingError(
-    string Url,
-    string Message
-);
+namespace GovTrackr.DocumentScraping.Worker.Infrastructure.Scrapers.Models;
+
+internal class ScrapingError : Error
+{
+    internal ScrapingError(string url, string message) : base(message)
+    {
+        Metadata.Add("Url", url);
+    }
+}

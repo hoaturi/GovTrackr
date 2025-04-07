@@ -4,7 +4,7 @@ namespace Shared.MessageContracts;
 
 public record DocumentDiscovered
 {
-    public List<DocumentInfo> Documents { get; init; } = [];
+    public required DocumentInfo Document { get; init; }
     public DocumentCategoryType DocumentCategory { get; init; }
 }
 
