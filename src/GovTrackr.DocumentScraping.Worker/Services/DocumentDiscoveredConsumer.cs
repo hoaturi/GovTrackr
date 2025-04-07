@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+using GovTrackr.DocumentScraping.Worker.Application.Dtos;
 using GovTrackr.DocumentScraping.Worker.Application.Interfaces;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -52,17 +53,17 @@ internal class DocumentDiscoveredConsumer(
     }
 
     private async Task HandleScrapeResultAsync(
-        Result<PresidentialAction> result,
+        Result<ScrapedPresidentialActionDto> dto,
         DocumentCategoryType category,
         CancellationToken cancellationToken)
     {
-        if (result.IsSuccess)
+        if (dto.IsSuccess)
         {
-            await SaveSuccessfulDocumentAsync(result.Value, category, cancellationToken);
+            await SaveSuccessfulDocumentAsync(dto.Value, category, cancellationToken);
         }
         else
         {
-            var error = result.Errors.First();
+            var error = dto.Errors.First();
             error.Metadata.TryGetValue("Url", out var url);
 
             logger.LogWarning(
@@ -72,15 +73,25 @@ internal class DocumentDiscoveredConsumer(
     }
 
     private async Task SaveSuccessfulDocumentAsync(
-        PresidentialAction document,
+        ScrapedPresidentialActionDto dto,
         DocumentCategoryType category,
         CancellationToken cancellationToken)
     {
-        await dbContext.PresidentialActions.AddAsync(document, cancellationToken);
+        var presidentialAction = new PresidentialAction
+        {
+            Title = dto.Title,
+            Content = dto.Content,
+            SourceUrl = dto.SourceUrl,
+            PublishedAt = dto.PublishedAt,
+            SubCategoryId = (int)dto.SubCategory,
+            TranslationStatus = TranslationStatus.Pending
+        };
+
+        await dbContext.PresidentialActions.AddAsync(presidentialAction, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("[{Category}] Successfully saved document from URL: {Url}",
-            category.ToString(), document.SourceUrl);
+            category.ToString(), dto.SourceUrl);
     }
 
     private IScraper GetScraper(DocumentCategoryType category)

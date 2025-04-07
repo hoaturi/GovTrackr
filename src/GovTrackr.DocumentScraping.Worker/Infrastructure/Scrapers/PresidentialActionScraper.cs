@@ -1,11 +1,11 @@
 ﻿using System.Text;
 using FluentResults;
+using GovTrackr.DocumentScraping.Worker.Application.Dtos;
 using GovTrackr.DocumentScraping.Worker.Application.Interfaces;
 using GovTrackr.DocumentScraping.Worker.Infrastructure.Scrapers.Models;
 using Microsoft.Playwright;
 using Shared.Abstractions.Browser;
 using Shared.Domain.Common;
-using Shared.Domain.PresidentialAction;
 using Shared.MessageContracts;
 
 namespace GovTrackr.DocumentScraping.Worker.Infrastructure.Scrapers;
@@ -19,7 +19,7 @@ internal class PresidentialActionScraper(
     private const string DateSelector = ".wp-block-post-date time";
     private const string ContentContainerSelector = ".entry-content.wp-block-post-content";
 
-    public async Task<Result<PresidentialAction>> ScrapeAsync(DocumentInfo document,
+    public async Task<Result<ScrapedPresidentialActionDto>> ScrapeAsync(DocumentInfo document,
         CancellationToken cancellationToken)
     {
         var page = await browserService.GetPageAsync();
@@ -31,7 +31,6 @@ internal class PresidentialActionScraper(
             if (response is not { Ok: true })
                 throw new Exception($"Failed to load page: {response?.Status}");
 
-            
             var category = await ExtractTextAsync(page, CategorySelector);
             var contentHtml = await ExtractContentAsync(page);
             if (string.IsNullOrEmpty(contentHtml))
@@ -45,17 +44,15 @@ internal class PresidentialActionScraper(
             if (publicationDate is null)
                 return Result.Fail(new ScrapingError(document.Url, "Failed to extract publication date"));
 
-            var action = new PresidentialAction
-            {
-                SubCategoryId = (int)categoryType.Value,
-                Title = document.Title,
-                Content = markdownConverter.Convert(contentHtml),
-                SourceUrl = document.Url,
-                PublishedAt = publicationDate.Value,
-                TranslationStatus = TranslationStatus.Pending
-            };
+            var dto = new ScrapedPresidentialActionDto(
+                document.Title,
+                markdownConverter.Convert(contentHtml),
+                document.Url,
+                publicationDate.Value,
+                categoryType.Value
+            );
 
-            return Result.Ok(action);
+            return Result.Ok(dto);
         }
         finally
         {
