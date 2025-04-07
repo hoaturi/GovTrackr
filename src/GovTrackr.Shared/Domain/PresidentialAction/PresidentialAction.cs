@@ -11,7 +11,7 @@ public class PresidentialAction : BaseEntity
     public required string SourceUrl { get; set; }
     public DateTime PublishedAt { get; set; }
     public DocumentSubCategory SubCategory { get; set; } = null!;
-    public TranslationStatus TranslationStatus { get; set; }
+    public required TranslationStatus TranslationStatus { get; set; }
     public PresidentialActionTranslation? Translation { get; set; }
 }
 
