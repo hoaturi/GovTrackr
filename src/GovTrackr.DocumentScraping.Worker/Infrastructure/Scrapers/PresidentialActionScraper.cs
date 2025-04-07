@@ -28,36 +28,43 @@ internal class PresidentialActionScraper(
         {
             var response = await page.GotoAsync(document.Url,
                 new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+            
             if (response is not { Ok: true })
-                throw new Exception($"Failed to load page: {response?.Status}");
+                return Result.Fail(new ScrapingError(document.Url, $"Failed to load page: {response?.Status}"));
 
-            var category = await ExtractTextAsync(page, CategorySelector);
-            var contentHtml = await ExtractContentAsync(page);
-            if (string.IsNullOrEmpty(contentHtml))
-                return Result.Fail(new ScrapingError(document.Url, "Failed to extract content"));
-
-            var categoryType = ParseCategoryType(category, document.Title, contentHtml);
-            if (categoryType is null)
-                return Result.Fail(new ScrapingError(document.Url, "Failed to infer category"));
-
-            var publicationDate = await ExtractDateTimeInUtcAsync(page);
-            if (publicationDate is null)
-                return Result.Fail(new ScrapingError(document.Url, "Failed to extract publication date"));
-
-            var dto = new ScrapedPresidentialActionDto(
-                document.Title,
-                markdownConverter.Convert(contentHtml),
-                document.Url,
-                publicationDate.Value,
-                categoryType.Value
-            );
-
-            return Result.Ok(dto);
+            return await ParseAsync(page, document, cancellationToken);
         }
         finally
         {
             await browserService.ClosePageAsync(page);
         }
+    }
+
+    public async Task<Result<ScrapedPresidentialActionDto>> ParseAsync(IPage page, DocumentInfo document,
+        CancellationToken cancellationToken)
+    {
+        var category = await ExtractTextAsync(page, CategorySelector);
+        var contentHtml = await ExtractContentAsync(page);
+        if (string.IsNullOrEmpty(contentHtml))
+            return Result.Fail(new ScrapingError(document.Url, "Failed to extract content"));
+
+        var categoryType = ParseCategoryType(category, document.Title, contentHtml);
+        if (categoryType is null)
+            return Result.Fail(new ScrapingError(document.Url, "Failed to infer category"));
+
+        var publicationDate = await ExtractDateTimeInUtcAsync(page);
+        if (publicationDate is null)
+            return Result.Fail(new ScrapingError(document.Url, "Failed to extract publication date"));
+
+        var dto = new ScrapedPresidentialActionDto(
+            document.Title,
+            markdownConverter.Convert(contentHtml),
+            document.Url,
+            publicationDate.Value,
+            categoryType.Value
+        );
+
+        return Result.Ok(dto);
     }
 
     private static async Task<string?> ExtractTextAsync(IPage page, string selector)
