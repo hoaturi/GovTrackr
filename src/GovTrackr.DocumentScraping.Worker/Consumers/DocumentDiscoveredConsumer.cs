@@ -8,7 +8,7 @@ using Shared.Domain.PresidentialAction;
 using Shared.Infrastructure.Persistence.Context;
 using Shared.MessageContracts;
 
-namespace GovTrackr.DocumentScraping.Worker.Services;
+namespace GovTrackr.DocumentScraping.Worker.Consumers;
 
 internal class DocumentDiscoveredConsumer(
     AppDbContext dbContext,

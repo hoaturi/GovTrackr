@@ -1,8 +1,8 @@
 ﻿using GovTrackr.DocumentScraping.Worker.Application.Interfaces;
 using GovTrackr.DocumentScraping.Worker.Configurations.Options;
+using GovTrackr.DocumentScraping.Worker.Consumers;
 using GovTrackr.DocumentScraping.Worker.Infrastructure.Converters;
 using GovTrackr.DocumentScraping.Worker.Infrastructure.Scrapers;
-using GovTrackr.DocumentScraping.Worker.Services;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
