@@ -10,7 +10,6 @@ using Shared.Abstractions.Browser;
 using Shared.Domain.Common;
 using Shared.Infrastructure.Browser;
 using Shared.Infrastructure.Persistence.Context;
-using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
 
 namespace GovTrackr.DocumentScraping.Worker.Configurations.Extensions;
 
