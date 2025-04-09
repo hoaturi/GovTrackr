@@ -13,6 +13,7 @@ namespace GovTrackr.DocumentScraping.Worker.Consumers;
 internal class DocumentDiscoveredConsumer(
     AppDbContext dbContext,
     IServiceProvider serviceProvider,
+    IPublishEndpoint endpoint,
     ILogger<DocumentDiscoveredConsumer> logger
 ) : IConsumer<DocumentDiscovered>
 {
@@ -53,17 +54,27 @@ internal class DocumentDiscoveredConsumer(
     }
 
     private async Task HandleScrapeResultAsync(
-        Result<ScrapedPresidentialActionDto> dto,
+        Result<ScrapedPresidentialActionDto> result,
         DocumentCategoryType category,
         CancellationToken cancellationToken)
     {
-        if (dto.IsSuccess)
+        if (result.IsSuccess)
         {
-            await SaveSuccessfulDocumentAsync(dto.Value, category, cancellationToken);
+            var documentId = await SaveSuccessfulDocumentAsync(result.Value, category, cancellationToken);
+
+            var message = new DocumentScraped
+            {
+                DocumentId = documentId,
+                DocumentCategory = category
+            };
+            await endpoint.Publish(message, cancellationToken);
+
+            logger.LogInformation("[{Category}] Document scraped and published. Url: {Url}",
+                category.ToString(), result.Value.SourceUrl);
         }
         else
         {
-            var error = dto.Errors.First();
+            var error = result.Errors.First();
             error.Metadata.TryGetValue("Url", out var url);
 
             logger.LogWarning(
@@ -72,7 +83,7 @@ internal class DocumentDiscoveredConsumer(
         }
     }
 
-    private async Task SaveSuccessfulDocumentAsync(
+    private async Task<Guid> SaveSuccessfulDocumentAsync(
         ScrapedPresidentialActionDto dto,
         DocumentCategoryType category,
         CancellationToken cancellationToken)
@@ -90,8 +101,7 @@ internal class DocumentDiscoveredConsumer(
         await dbContext.PresidentialActions.AddAsync(presidentialAction, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation("[{Category}] Successfully saved document from URL: {Url}",
-            category.ToString(), dto.SourceUrl);
+        return presidentialAction.Id;
     }
 
     private IScraper GetScraper(DocumentCategoryType category)
