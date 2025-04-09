@@ -16,4 +16,10 @@
         <ProjectReference Include="..\GovTrackr.ServiceDefaults\GovTrackr.ServiceDefaults.csproj"/>
         <ProjectReference Include="..\GovTrackr.Shared\GovTrackr.Shared.csproj"/>
     </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Infrastructure\Prompting\Prompts\PresidentialActionTranslationPrompt.xml">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 </Project>
