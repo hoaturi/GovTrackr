@@ -8,7 +8,7 @@ public class PresidentialActionTranslation : BaseEntity
 
     public Guid PresidentialActionId { get; set; }
 
-    public required PresidentialAction PresidentialAction { get; set; }
+    public PresidentialAction PresidentialAction { get; set; } = null!;
 
     public required string Title { get; set; }
 
