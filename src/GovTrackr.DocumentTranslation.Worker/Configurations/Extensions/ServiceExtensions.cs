@@ -6,6 +6,7 @@ using GovTrackr.DocumentTranslation.Worker.Infrastructure.Prompting;
 using GovTrackr.DocumentTranslation.Worker.Infrastructure.Translators;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
 using Shared.Domain.Common;
 using Shared.Infrastructure.Persistence.Context;
@@ -54,12 +55,27 @@ internal static class ServiceExtensions
 
     private static IServiceCollection AddHttpClients(this IServiceCollection services)
     {
+        // Use longer timeout for Gemini API
+        services.ConfigureHttpClientDefaults(http =>
+        {
+            http.AddStandardResilienceHandler(config =>
+            {
+                config.AttemptTimeout.Timeout = TimeSpan.FromSeconds(60);
+                config.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(180);
+                config.CircuitBreaker = new HttpCircuitBreakerStrategyOptions
+                {
+                    SamplingDuration = TimeSpan.FromSeconds(180)
+                };
+            });
+        });
+
         services.AddHttpClient("GeminiClient", (serviceProvider, client) =>
         {
             var options = serviceProvider.GetRequiredService<IOptions<GeminiOptions>>().Value;
             client.BaseAddress =
                 new Uri(
-                    $"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key={options.ApiKey}");
+                    $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-03-25:generateContent?key={options.ApiKey}");
+            client.Timeout = TimeSpan.FromSeconds(60);
         });
 
         return services;
