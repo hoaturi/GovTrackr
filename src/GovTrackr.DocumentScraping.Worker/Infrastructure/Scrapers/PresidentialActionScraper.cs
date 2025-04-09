@@ -40,7 +40,7 @@ internal class PresidentialActionScraper(
         }
     }
 
-    public async Task<Result<ScrapedPresidentialActionDto>> ParseAsync(IPage page, DocumentInfo document,
+    private async Task<Result<ScrapedPresidentialActionDto>> ParseAsync(IPage page, DocumentInfo document,
         CancellationToken cancellationToken)
     {
         var category = await ExtractTextAsync(page, CategorySelector);
