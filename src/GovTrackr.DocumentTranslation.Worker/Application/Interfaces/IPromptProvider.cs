@@ -1,6 +1,8 @@
-﻿namespace GovTrackr.DocumentTranslation.Worker.Application.Interfaces;
+﻿using Shared.Domain.Common;
+
+namespace GovTrackr.DocumentTranslation.Worker.Application.Interfaces;
 
 public interface IPromptProvider
 {
-    string PresidentialActionPrompt { get; }
+    string GetPrompt(DocumentCategoryType category);
 }
