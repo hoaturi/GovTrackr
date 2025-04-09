@@ -18,8 +18,9 @@
 
     <ItemGroup>
         <ProjectReference Include="..\GovTrackr.Api\GovTrackr.Api.csproj"/>
+        <ProjectReference Include="..\GovTrackr.DocumentTranslation.Worker\GovTrackr.DocumentTranslation.Worker.csproj"/>
         <ProjectReference Include="..\GovTrackr.MigrationService\GovTrackr.MigrationService.csproj"/>
-        <ProjectReference Include="..\GovTrackr.DocumentScraping.Worker\GovTrackr.DocumentScraping.Worker.csproj" />
+        <ProjectReference Include="..\GovTrackr.DocumentScraping.Worker\GovTrackr.DocumentScraping.Worker.csproj"/>
     </ItemGroup>
 
 </Project>
