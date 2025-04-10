@@ -1,4 +1,5 @@
-﻿using GovTrackr.DocumentTranslation.Worker.Application.Interfaces;
+﻿using System.Net;
+using GovTrackr.DocumentTranslation.Worker.Application.Interfaces;
 using GovTrackr.DocumentTranslation.Worker.Application.Services;
 using GovTrackr.DocumentTranslation.Worker.Configurations.Options;
 using GovTrackr.DocumentTranslation.Worker.Consumers;
@@ -9,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
 using Polly;
+using Polly.Timeout;
 using Shared.Domain.Common;
 using Shared.Infrastructure.Persistence.Context;
 
@@ -56,36 +58,43 @@ internal static class ServiceExtensions
 
     private static IServiceCollection AddHttpClients(this IServiceCollection services)
     {
-        // Use longer timeout for Gemini API
-        services.ConfigureHttpClientDefaults(http =>
-        {
-            http.AddStandardResilienceHandler(config =>
-            {
-                config.AttemptTimeout.Timeout = TimeSpan.FromSeconds(60);
-                config.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(180);
-
-                config.Retry.MaxRetryAttempts = 3;
-                config.Retry.Delay = TimeSpan.FromSeconds(2);
-                config.Retry.BackoffType = DelayBackoffType.Exponential;
-
-                config.CircuitBreaker = new HttpCircuitBreakerStrategyOptions
-                {
-                    SamplingDuration = TimeSpan.FromSeconds(180),
-                    BreakDuration = TimeSpan.FromSeconds(30),
-                    FailureRatio = 0.5,
-                    MinimumThroughput = 10
-                };
-            });
-        });
-
+#pragma warning disable EXTEXP0001
         services.AddHttpClient("GeminiClient", (serviceProvider, client) =>
-        {
-            var options = serviceProvider.GetRequiredService<IOptions<GeminiOptions>>().Value;
-            client.BaseAddress =
-                new Uri(
-                    $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={options.ApiKey}");
-            client.Timeout = TimeSpan.FromSeconds(60);
-        });
+            {
+                var options = serviceProvider.GetRequiredService<IOptions<GeminiOptions>>().Value;
+                client.BaseAddress = new Uri(
+                    $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-03-25:generateContent?key={options.ApiKey}");
+                client.Timeout = Timeout.InfiniteTimeSpan;
+            })
+            // HACK: This is a workaround for the issue with HttpClientFactory and Polly
+            // It overrides the default resilience policy
+            .RemoveAllResilienceHandlers()
+            .AddResilienceHandler("CustomGeminiPolicy", config =>
+            {
+                config.AddRetry(new HttpRetryStrategyOptions
+                {
+                    MaxRetryAttempts = 1,
+                    BackoffType = DelayBackoffType.Exponential,
+                    Delay = TimeSpan.FromSeconds(2),
+                    ShouldHandle = args => ValueTask.FromResult(
+                        // Default transient HTTP errors OR Polly Timeout Exception
+                        args.Outcome.Result?.StatusCode >= HttpStatusCode.InternalServerError || // 5xx
+                        args.Outcome.Result?.StatusCode == HttpStatusCode.RequestTimeout || // 408
+                        args.Outcome.Exception is TimeoutRejectedException || // Explicitly handle Polly Timeout
+                        args.Outcome.Exception is HttpRequestException // Default exception handling
+                    )
+                });
+
+                config.AddTimeout(TimeSpan.FromSeconds(60));
+
+                config.AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions
+                {
+                    SamplingDuration = TimeSpan.FromMinutes(3),
+                    BreakDuration = TimeSpan.FromSeconds(15),
+                    FailureRatio = 0.8,
+                    MinimumThroughput = 20
+                });
+            });
 
         return services;
     }
@@ -124,7 +133,7 @@ internal static class ServiceExtensions
                 var connectionStringsOptions = context.GetRequiredService<IOptions<ConnectionStringsOptions>>().Value;
                 cfg.Host(connectionStringsOptions.AzureServiceBus);
                 cfg.ConfigureEndpoints(context);
-                cfg.UseMessageRetry(r => { r.Interval(3, TimeSpan.FromSeconds(10)); });
+                // cfg.UseMessageRetry(r => { r.Interval(3, TimeSpan.FromSeconds(10)); });
             });
         });
 
