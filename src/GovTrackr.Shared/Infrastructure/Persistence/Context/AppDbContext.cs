@@ -10,6 +10,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<PresidentialActionTranslation> PresidentialActionTranslations { get; set; }
     public DbSet<DocumentSubCategory> DocumentSubCategories { get; set; }
     public DbSet<DocumentCategory> DocumentCategories { get; set; }
+    public DbSet<Keyword> Keywords { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
