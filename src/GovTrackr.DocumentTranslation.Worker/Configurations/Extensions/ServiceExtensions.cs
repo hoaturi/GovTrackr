@@ -74,7 +74,7 @@ internal static class ServiceExtensions
             var options = serviceProvider.GetRequiredService<IOptions<GeminiOptions>>().Value;
             client.BaseAddress =
                 new Uri(
-                    $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-03-25:generateContent?key={options.ApiKey}");
+                    $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={options.ApiKey}");
             client.Timeout = TimeSpan.FromSeconds(60);
         });
 
