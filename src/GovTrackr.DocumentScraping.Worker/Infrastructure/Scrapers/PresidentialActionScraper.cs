@@ -28,11 +28,11 @@ internal class PresidentialActionScraper(
         {
             var response = await page.GotoAsync(document.Url,
                 new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
-            
+
             if (response is not { Ok: true })
                 return Result.Fail(new ScrapingError(document.Url, $"Failed to load page: {response?.Status}"));
 
-            return await ParseAsync(page, document, cancellationToken);
+            return await ParseAsync(page, document);
         }
         finally
         {
@@ -40,8 +40,7 @@ internal class PresidentialActionScraper(
         }
     }
 
-    private async Task<Result<ScrapedPresidentialActionDto>> ParseAsync(IPage page, DocumentInfo document,
-        CancellationToken cancellationToken)
+    private async Task<Result<ScrapedPresidentialActionDto>> ParseAsync(IPage page, DocumentInfo document)
     {
         var category = await ExtractTextAsync(page, CategorySelector);
         var contentHtml = await ExtractContentAsync(page);
