@@ -3,5 +3,6 @@
 public record TranslatedPresidentialActionDto(
     string Title,
     string Summary,
-    string Details
+    string Details,
+    List<string> Keywords
 );

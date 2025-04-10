@@ -62,7 +62,8 @@ public class PresidentialActionTranslator(
         return new TranslatedPresidentialActionDto(
             processed!.Title,
             processed.Summary,
-            processed.Details
+            processed.Details,
+            processed.Keywords
         );
     }
 
