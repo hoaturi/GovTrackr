@@ -58,7 +58,7 @@
             <Format>Single Markdown string.</Format>
             <Content>
                 MUST include literal headings "주요 조치 사항" and "기타 사항".
-                Use bullet points (`* ` or `- `) with Kyejoshik style for items under each heading.
+                Use bullet points `*` with Kyejoshik style for items under each heading.
                 "주요 조치 사항": Detail specific actions/directives from source (include entities, refs, dates *only if
                 specified*).
                 "기타 사항": Detail other relevant info from source (e.g., scope, limitations).
