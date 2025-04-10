@@ -133,7 +133,7 @@ internal static class ServiceExtensions
                 var connectionStringsOptions = context.GetRequiredService<IOptions<ConnectionStringsOptions>>().Value;
                 cfg.Host(connectionStringsOptions.AzureServiceBus);
                 cfg.ConfigureEndpoints(context);
-                // cfg.UseMessageRetry(r => { r.Interval(3, TimeSpan.FromSeconds(10)); });
+                cfg.UseMessageRetry(r => { r.Interval(3, TimeSpan.FromSeconds(10)); });
             });
         });
 
