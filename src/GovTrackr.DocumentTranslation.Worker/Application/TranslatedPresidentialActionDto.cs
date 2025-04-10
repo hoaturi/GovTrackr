@@ -2,5 +2,6 @@
 
 public record TranslatedPresidentialActionDto(
     string Title,
+    string Summary,
     string Details
 );
