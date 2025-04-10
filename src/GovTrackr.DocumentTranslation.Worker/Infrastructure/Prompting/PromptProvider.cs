@@ -11,7 +11,7 @@ internal class PromptProvider : IPromptProvider
     {
         var presidentialActionPromptPath = Path.Combine(AppContext.BaseDirectory, "Infrastructure", "Prompting",
             "Prompts",
-            "PresidentialActionTranslationPrompt.xml");
+            "PresidentialActionTranslationPrompt.md");
 
         Console.WriteLine(presidentialActionPromptPath);
 
