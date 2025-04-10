@@ -8,6 +8,7 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
+using Polly;
 using Shared.Domain.Common;
 using Shared.Infrastructure.Persistence.Context;
 
@@ -62,9 +63,17 @@ internal static class ServiceExtensions
             {
                 config.AttemptTimeout.Timeout = TimeSpan.FromSeconds(60);
                 config.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(180);
+
+                config.Retry.MaxRetryAttempts = 3;
+                config.Retry.Delay = TimeSpan.FromSeconds(2);
+                config.Retry.BackoffType = DelayBackoffType.Exponential;
+
                 config.CircuitBreaker = new HttpCircuitBreakerStrategyOptions
                 {
-                    SamplingDuration = TimeSpan.FromSeconds(180)
+                    SamplingDuration = TimeSpan.FromSeconds(180),
+                    BreakDuration = TimeSpan.FromSeconds(30),
+                    FailureRatio = 0.5,
+                    MinimumThroughput = 10
                 };
             });
         });
@@ -115,6 +124,7 @@ internal static class ServiceExtensions
                 var connectionStringsOptions = context.GetRequiredService<IOptions<ConnectionStringsOptions>>().Value;
                 cfg.Host(connectionStringsOptions.AzureServiceBus);
                 cfg.ConfigureEndpoints(context);
+                cfg.UseMessageRetry(r => { r.Interval(3, TimeSpan.FromSeconds(10)); });
             });
         });
 
