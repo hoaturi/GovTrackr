@@ -22,6 +22,11 @@ public class PresidentialActionTranslationConfig : IEntityTypeConfiguration<Pres
         builder.Property(t => t.PresidentialActionId)
             .IsRequired();
 
+        builder.HasIndex(t => t.PresidentialActionId)
+            .IsUnique();
+
+        builder.Property(t => t.KeywordIds).IsRequired();
+
         builder.HasOne(t => t.PresidentialAction)
             .WithOne(p => p.Translation)
             .HasForeignKey<PresidentialActionTranslation>(t => t.PresidentialActionId)
