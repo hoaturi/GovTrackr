@@ -2,6 +2,8 @@
 using System.Text.Json;
 using FluentResults;
 using GovTrackr.DocumentTranslation.Worker.Application.Dtos;
+using GovTrackr.DocumentTranslation.Worker.Application.Errors;
+using GovTrackr.DocumentTranslation.Worker.Application.Exceptions;
 using GovTrackr.DocumentTranslation.Worker.Application.Interfaces;
 using GovTrackr.DocumentTranslation.Worker.Infrastructure.Translators.Models;
 using Shared.Domain.Common;
@@ -24,14 +26,14 @@ public class PresidentialActionTranslator(
         var request = BuildGeminiRequest(title, content);
 
         var result = await SendTranslationRequestAsync(httpClient, request, cancellationToken);
-        if (!result.Success)
-            return Result.Fail(new TranslationError(result.ErrorMessage));
+        if (!result.IsSuccess)
+            return Result.Fail(result.Errors.First());
 
-        var dto = ParseResponse(result.Response!);
+        var dto = ParseResponse(result.Value);
         return Result.Ok(dto);
     }
 
-    private static async Task<(bool Success, GeminiResponse? Response, string ErrorMessage)>
+    private static async Task<Result<GeminiResponse>>
         SendTranslationRequestAsync(
             HttpClient httpClient,
             GeminiRequest request,
@@ -39,14 +41,15 @@ public class PresidentialActionTranslator(
     {
         var response = await httpClient.PostAsJsonAsync("", request, cancellationToken);
 
+        // Transient error such as timeout or server error will be retried by Polly
+        // Only permanent errors will be handled here
         if (!response.IsSuccessStatusCode)
-            return (false, null, "Translation API responded with a failure status code.");
+            return Result.Fail(TranslationErrors.ApiFailed(response.StatusCode));
 
         var responseContent = await response.Content.ReadFromJsonAsync<GeminiResponse>(cancellationToken);
+        if (responseContent is null) throw TranslationExceptions.EmptyResponseContent;
 
-        return responseContent is null
-            ? (false, null, "Failed to deserialize translation response.")
-            : (true, responseContent, string.Empty);
+        return Result.Ok(responseContent);
     }
 
     private static TranslatedPresidentialActionDto ParseResponse(GeminiResponse response)
@@ -55,7 +58,7 @@ public class PresidentialActionTranslator(
 
         // If response is not valid throw exception and rely on MassTransit to retry
         if (string.IsNullOrWhiteSpace(content))
-            throw new InvalidOperationException("Response does not contain valid text content.");
+            throw TranslationExceptions.InvalidTextContent;
 
         var processed = ExtractProcessedOutput(content); // may throw JsonException
 

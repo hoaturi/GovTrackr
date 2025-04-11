@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using GovTrackr.DocumentTranslation.Worker.Application.Dtos;
+using GovTrackr.DocumentTranslation.Worker.Application.Errors;
 using GovTrackr.DocumentTranslation.Worker.Application.Interfaces;
-using GovTrackr.DocumentTranslation.Worker.Infrastructure.Translators.Models;
 using Microsoft.EntityFrameworkCore;
 using Shared.Domain.Common;
 using Shared.Domain.PresidentialAction;
@@ -21,14 +21,14 @@ public class PresidentialActionTranslationService(
             .FirstOrDefaultAsync(pa => pa.Id == documentId, cancellationToken);
 
         if (document is null)
-            return Result.Fail(new TranslationError("Presidential action not found"));
+            return Result.Fail(TranslationErrors.DocumentNotFound);
 
         if (document.TranslationStatus == TranslationStatus.Completed)
-            return Result.Fail(new TranslationError("Presidential action already translated"));
+            return Result.Fail(TranslationErrors.DocumentAlreadyTranslated);
 
         var result = await translator.TranslateAsync(document.Title, document.Content, cancellationToken);
 
-        if (!result.IsSuccess) return Result.Fail(new TranslationError(result.Errors.First().Message));
+        if (!result.IsSuccess) return Result.Fail(result.Errors.First());
 
         await SaveTranslatedDocumentAsync(document, result.Value, cancellationToken);
 
