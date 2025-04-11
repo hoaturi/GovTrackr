@@ -1,4 +1,4 @@
-﻿namespace GovTrackr.DocumentTranslation.Worker.Application;
+﻿namespace GovTrackr.DocumentTranslation.Worker.Application.Dtos;
 
 public record TranslatedPresidentialActionDto(
     string Title,

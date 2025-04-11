@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+using GovTrackr.DocumentTranslation.Worker.Application.Dtos;
 
 namespace GovTrackr.DocumentTranslation.Worker.Application.Interfaces;
 

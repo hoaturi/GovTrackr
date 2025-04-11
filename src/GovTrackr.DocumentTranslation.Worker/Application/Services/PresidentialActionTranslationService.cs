@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+using GovTrackr.DocumentTranslation.Worker.Application.Dtos;
 using GovTrackr.DocumentTranslation.Worker.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Shared.Domain.Common;

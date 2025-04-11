@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
 using FluentResults;
-using GovTrackr.DocumentTranslation.Worker.Application;
+using GovTrackr.DocumentTranslation.Worker.Application.Dtos;
 using GovTrackr.DocumentTranslation.Worker.Application.Interfaces;
 using GovTrackr.DocumentTranslation.Worker.Infrastructure.Translators.Models;
 using Shared.Domain.Common;
