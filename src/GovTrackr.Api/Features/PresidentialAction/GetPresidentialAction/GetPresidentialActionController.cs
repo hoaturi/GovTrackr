@@ -12,7 +12,7 @@ public class GetPresidentialActionController(IMediator mediator) : ApiController
     [HttpGet]
     public async Task<IActionResult> GetPresidentialAction(
         [FromRoute] Guid id,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken)
     {
         var query = new GetPresidentialActionQuery(id);
         var result = await mediator.Send(query, cancellationToken);
