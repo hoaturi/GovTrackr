@@ -1,4 +1,4 @@
-﻿namespace GovTrackr.Application.Features.PresidentialAction.GetPresidentialAction;
+﻿namespace GovTrackr.Api.Features.PresidentialAction.GetPresidentialAction;
 
 public record GetPresidentialActionResponse(
     Guid Id,

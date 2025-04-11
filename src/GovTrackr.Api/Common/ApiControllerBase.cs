@@ -1,10 +1,8 @@
 ﻿using FluentResults;
-using GovTrackr.Application.Common.Models;
 using Microsoft.AspNetCore.Mvc;
-using Shared.Abstractions.Errors;
 using Shared.Common.Errors;
 
-namespace GovTrackr.Application.Common;
+namespace GovTrackr.Api.Common;
 
 /// <summary>
 ///     Base API controller that provides a method for converting a Result to an ActionResult.

@@ -1,9 +1,10 @@
 ﻿using GovTrackr.Application.Configurations.Options;
+using GovTrackr.Api.Configurations.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Shared.Infrastructure.Persistence.Context;
 
-namespace GovTrackr.Application.Configurations.Extensions;
+namespace GovTrackr.Api.Configurations.Extensions;
 
 internal static class ServiceExtensions
 {

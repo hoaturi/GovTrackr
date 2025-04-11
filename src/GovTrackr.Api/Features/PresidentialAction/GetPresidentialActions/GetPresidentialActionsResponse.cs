@@ -1,4 +1,4 @@
-﻿namespace GovTrackr.Application.Features.PresidentialAction.GetPresidentialActions;
+﻿namespace GovTrackr.Api.Features.PresidentialAction.GetPresidentialActions;
 
 public record GetPresidentialActionsResponse(
     List<GetPresidentialActionsItem> Items,

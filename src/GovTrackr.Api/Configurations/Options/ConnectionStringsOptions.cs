@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GovTrackr.Application.Configurations.Options;
+namespace GovTrackr.Api.Configurations.Options;
 
 internal class ConnectionStringsOptions
 {

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Shared.Domain.PresidentialAction;
 using Shared.Infrastructure.Persistence.Context;
 
-namespace GovTrackr.Application.Features.PresidentialAction.GetPresidentialActions;
+namespace GovTrackr.Api.Features.PresidentialAction.GetPresidentialActions;
 
 public class
     GetPresidentialActionsQueryHandler(AppDbContext dbContext) : IRequestHandler<GetPresidentialActionsQuery,

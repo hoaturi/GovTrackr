@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using MediatR;
 
-namespace GovTrackr.Application.Features.PresidentialAction.GetPresidentialActions;
+namespace GovTrackr.Api.Features.PresidentialAction.GetPresidentialActions;
 
 public record GetPresidentialActionsQuery(
     string? Category,

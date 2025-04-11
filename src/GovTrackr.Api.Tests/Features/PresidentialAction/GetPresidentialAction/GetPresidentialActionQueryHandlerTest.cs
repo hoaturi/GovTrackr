@@ -2,9 +2,8 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using GovTrackr.Application.Features.PresidentialAction.GetPresidentialAction;
+using GovTrackr.Api.Features.PresidentialAction.GetPresidentialAction;
 using Microsoft.EntityFrameworkCore.Storage;
-using Shared.Abstractions.Errors;
 using Shared.Common.Errors;
 using Shared.Domain.Common;
 using Shared.Infrastructure.Persistence.Context;

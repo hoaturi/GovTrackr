@@ -1,8 +1,8 @@
-﻿using GovTrackr.Application.Common;
+﻿using GovTrackr.Api.Common;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GovTrackr.Application.Features.PresidentialAction.GetPresidentialActions;
+namespace GovTrackr.Api.Features.PresidentialAction.GetPresidentialActions;
 
 [ApiController]
 [Route("presidential-actions")]
