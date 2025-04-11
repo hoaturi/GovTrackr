@@ -77,11 +77,10 @@ internal static class ServiceExtensions
                     BackoffType = DelayBackoffType.Exponential,
                     Delay = TimeSpan.FromSeconds(2),
                     ShouldHandle = args => ValueTask.FromResult(
-                        // Default transient HTTP errors OR Polly Timeout Exception
-                        args.Outcome.Result?.StatusCode >= HttpStatusCode.InternalServerError || // 5xx
-                        args.Outcome.Result?.StatusCode == HttpStatusCode.RequestTimeout || // 408
-                        args.Outcome.Exception is TimeoutRejectedException || // Explicitly handle Polly Timeout
-                        args.Outcome.Exception is HttpRequestException // Default exception handling
+                        args.Outcome.Result?.StatusCode >= HttpStatusCode.InternalServerError ||
+                        args.Outcome.Result?.StatusCode == HttpStatusCode.RequestTimeout ||
+                        args.Outcome.Exception is TimeoutRejectedException ||
+                        args.Outcome.Exception is HttpRequestException
                     )
                 });
 
