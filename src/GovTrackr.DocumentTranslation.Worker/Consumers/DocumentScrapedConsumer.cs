@@ -6,23 +6,30 @@ using Shared.MessageContracts;
 namespace GovTrackr.DocumentTranslation.Worker.Consumers;
 
 public class DocumentScrapedConsumer(
-    IServiceProvider serviceProvider
-) : IConsumer<DocumentScraped>
+    IServiceProvider serviceProvider,
+    ILogger<DocumentScrapedConsumer> logger)
+    : IConsumer<DocumentScraped>
 {
     public async Task Consume(ConsumeContext<DocumentScraped> context)
     {
-        var documentId = context.Message.DocumentId;
-        var documentCategory = context.Message.DocumentCategory;
+        var message = context.Message;
+        var service = ResolveTranslationService(message.DocumentCategory);
 
-        var translationService = GetTranslationService(documentCategory);
+        var result = await service.TranslateDocumentAsync(message.DocumentId, context.CancellationToken);
 
-        await translationService.TranslateDocumentAsync(documentId, context.CancellationToken);
+        if (result.IsSuccess)
+        {
+            logger.LogInformation("[{Category}] Document translated successfully. Id: {Id}",
+                message.DocumentCategory.ToString(), message.DocumentId);
+            return;
+        }
+
+        logger.LogWarning("[{Category}] Failed to translate document. Id: {Id}. Reason: {Reason}",
+            message.DocumentCategory.ToString(), message.DocumentId, result.Errors.First().Message);
     }
 
-    private ITranslationService GetTranslationService(DocumentCategoryType category)
+    private ITranslationService ResolveTranslationService(DocumentCategoryType category)
     {
-        var service = serviceProvider.GetRequiredKeyedService<ITranslationService>(category);
-
-        return service;
+        return serviceProvider.GetRequiredKeyedService<ITranslationService>(category);
     }
 }

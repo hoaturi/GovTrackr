@@ -1,6 +1,7 @@
 ﻿using FluentResults;
 using GovTrackr.DocumentTranslation.Worker.Application.Dtos;
 using GovTrackr.DocumentTranslation.Worker.Application.Interfaces;
+using GovTrackr.DocumentTranslation.Worker.Infrastructure.Translators.Models;
 using Microsoft.EntityFrameworkCore;
 using Shared.Domain.Common;
 using Shared.Domain.PresidentialAction;
@@ -10,55 +11,42 @@ namespace GovTrackr.DocumentTranslation.Worker.Application.Services;
 
 public class PresidentialActionTranslationService(
     AppDbContext dbContext,
-    ILogger<ITranslationService> logger,
     [FromKeyedServices(DocumentCategoryType.PresidentialAction)]
     ITranslator translator)
     : ITranslationService
 {
-    public async Task TranslateDocumentAsync(Guid documentId, CancellationToken cancellationToken)
+    public async Task<Result<bool>> TranslateDocumentAsync(Guid documentId, CancellationToken cancellationToken)
     {
-        var document = await FindDocumentAsync(documentId, cancellationToken);
+        var document = await dbContext.PresidentialActions
+            .FirstOrDefaultAsync(pa => pa.Id == documentId, cancellationToken);
+
         if (document is null)
-        {
-            logger.LogWarning("Presidential action with ID {DocumentId} not found.", documentId);
-            return;
-        }
+            return Result.Fail(new TranslationError("Presidential action not found"));
 
         if (document.TranslationStatus == TranslationStatus.Completed)
-        {
-            logger.LogInformation("Presidential action with ID {DocumentId} already translated.", documentId);
-            return;
-        }
+            return Result.Fail(new TranslationError("Presidential action already translated"));
 
         var result = await translator.TranslateAsync(document.Title, document.Content, cancellationToken);
-        await ProcessTranslationResultAsync(document, result, cancellationToken);
+
+        if (!result.IsSuccess) return Result.Fail(new TranslationError(result.Errors.First().Message));
+
+        await SaveTranslatedDocumentAsync(document, result.Value, cancellationToken);
+
+        return Result.Ok(true);
     }
 
-    private Task<PresidentialAction?> FindDocumentAsync(Guid documentId, CancellationToken cancellationToken)
-    {
-        return dbContext.PresidentialActions
-            .FirstOrDefaultAsync(pa => pa.Id == documentId, cancellationToken);
-    }
-
-    private async Task ProcessTranslationResultAsync(
+    private async Task SaveTranslatedDocumentAsync(
         PresidentialAction document,
-        Result<TranslatedPresidentialActionDto> result,
+        TranslatedPresidentialActionDto dto,
         CancellationToken cancellationToken)
     {
-        if (result.IsFailed)
-        {
-            var errorMessage = result.Errors.First().Message;
-            logger.LogError("Translation failed for document ID {DocumentId}: {Error}", document.Id, errorMessage);
-            return;
-        }
-
-        var keywordIds = await GetOrCreateKeywordIdsAsync(result.Value.Keywords, cancellationToken);
+        var keywordIds = await GetOrCreateKeywordIdsAsync(dto.Keywords, cancellationToken);
 
         dbContext.PresidentialActionTranslations.Add(new PresidentialActionTranslation
         {
-            Title = result.Value.Title,
-            Summary = result.Value.Summary,
-            Content = result.Value.Details,
+            Title = dto.Title,
+            Summary = dto.Summary,
+            Content = dto.Details,
             PresidentialActionId = document.Id,
             KeywordIds = keywordIds
         });
@@ -71,29 +59,25 @@ public class PresidentialActionTranslationService(
         List<string> keywords,
         CancellationToken cancellationToken)
     {
-        var trimmedKeywords = keywords.Select(k => k.Trim()).Distinct().ToList();
+        var trimmed = keywords.Select(k => k.Trim()).Distinct().ToList();
 
-        var existingKeywords = await dbContext.Keywords
-            .Where(k => trimmedKeywords.Contains(k.Name))
+        var existing = await dbContext.Keywords
+            .AsNoTracking()
+            .Where(k => trimmed.Contains(k.Name))
             .ToListAsync(cancellationToken);
 
-        var existingKeywordMap = existingKeywords.ToDictionary(k => k.Name, k => k.Id);
+        var existingMap = existing.ToDictionary(k => k.Name, k => k.Id);
 
-        var newKeywords = trimmedKeywords
-            .Where(k => !existingKeywordMap.ContainsKey(k))
+        var newKeywords = trimmed
+            .Where(k => !existingMap.ContainsKey(k))
             .Select(k => new Keyword { Name = k })
             .ToList();
 
-        if (newKeywords.Count <= 0)
-            return existingKeywordMap.Values
-                .Concat(newKeywords.Select(k => k.Id))
-                .ToList();
+        if (newKeywords.Count <= 0) return existingMap.Values.Concat(newKeywords.Select(k => k.Id)).ToList();
 
         dbContext.Keywords.AddRange(newKeywords);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return existingKeywordMap.Values
-            .Concat(newKeywords.Select(k => k.Id))
-            .ToList();
+        return existingMap.Values.Concat(newKeywords.Select(k => k.Id)).ToList();
     }
 }
