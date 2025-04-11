@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using GovTrackr.DocumentScraping.Worker.Application.Dtos;
+using GovTrackr.DocumentScraping.Worker.Application.Errors;
 using GovTrackr.DocumentScraping.Worker.Application.Interfaces;
-using GovTrackr.DocumentScraping.Worker.Infrastructure.Scrapers.Models;
 using Microsoft.EntityFrameworkCore;
 using Shared.Domain.Common;
 using Shared.Domain.PresidentialAction;
@@ -20,14 +20,14 @@ public class PresidentialActionScrapingService(
     public async Task<Result<Guid>> ScrapeAsync(DocumentInfo document, CancellationToken cancellationToken)
     {
         if (await IsDuplicateDocumentAsync(document, cancellationToken))
-            return Result.Fail(new ScrapingError(document.Url, "Document already exists"));
+            return Result.Fail(ScrapingErrors.DocumentAlreadyScraped);
 
         var scrapeResult = await scraper.ScrapeAsync(document, cancellationToken);
 
         if (scrapeResult.IsSuccess)
             return await SaveScrapedDocumentAsync(scrapeResult.Value, cancellationToken);
 
-        return Result.Fail(new ScrapingError(document.Url, scrapeResult.Errors.First().Message));
+        return Result.Fail(scrapeResult.Errors.First());
     }
 
     private async Task<bool> IsDuplicateDocumentAsync(

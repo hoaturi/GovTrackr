@@ -1,8 +1,9 @@
-﻿using System.Text;
+﻿using System.Net;
+using System.Text;
 using FluentResults;
 using GovTrackr.DocumentScraping.Worker.Application.Dtos;
+using GovTrackr.DocumentScraping.Worker.Application.Errors;
 using GovTrackr.DocumentScraping.Worker.Application.Interfaces;
-using GovTrackr.DocumentScraping.Worker.Infrastructure.Scrapers.Models;
 using Microsoft.Playwright;
 using Shared.Abstractions.Browser;
 using Shared.Domain.Common;
@@ -26,11 +27,9 @@ internal class PresidentialActionScraper(
 
         try
         {
-            var response = await page.GotoAsync(document.Url,
-                new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+            var result = await NavigateToPageAsync(page, document.Url);
 
-            if (response is not { Ok: true })
-                return Result.Fail(new ScrapingError(document.Url, $"Failed to load page: {response?.Status}"));
+            if (result.IsFailed) return Result.Fail(result.Errors.First());
 
             return await ParseAsync(page, document);
         }
@@ -40,20 +39,41 @@ internal class PresidentialActionScraper(
         }
     }
 
+    private static async Task<Result<IPage>> NavigateToPageAsync(
+        IPage page,
+        string url)
+    {
+        var response = await page.GotoAsync(url,
+            new PageGotoOptions { WaitUntil = WaitUntilState.DOMContentLoaded });
+
+        if (response is null)
+            throw ScrapingExceptions.NullResponse;
+
+        if (response.Ok)
+            return Result.Ok(page);
+
+        var status = response.Status;
+
+        if (status is (int)HttpStatusCode.TooManyRequests or >= (int)HttpStatusCode.InternalServerError)
+            throw ScrapingExceptions.TransientHttpError(status);
+
+        return Result.Fail(ScrapingErrors.ApiFailed(status));
+    }
+
     private async Task<Result<ScrapedPresidentialActionDto>> ParseAsync(IPage page, DocumentInfo document)
     {
         var category = await ExtractTextAsync(page, CategorySelector);
         var contentHtml = await ExtractContentAsync(page);
         if (string.IsNullOrEmpty(contentHtml))
-            return Result.Fail(new ScrapingError(document.Url, "Failed to extract content"));
+            return Result.Fail(ScrapingErrors.EmptyContent);
 
         var categoryType = ParseCategoryType(category, document.Title, contentHtml);
         if (categoryType is null)
-            return Result.Fail(new ScrapingError(document.Url, "Failed to infer category"));
+            return Result.Fail(ScrapingErrors.FailedToParseCategory);
 
         var publicationDate = await ExtractDateTimeInUtcAsync(page);
         if (publicationDate is null)
-            return Result.Fail(new ScrapingError(document.Url, "Failed to extract publication date"));
+            return Result.Fail(ScrapingErrors.FailedToParseDate);
 
         var dto = new ScrapedPresidentialActionDto(
             document.Title,
