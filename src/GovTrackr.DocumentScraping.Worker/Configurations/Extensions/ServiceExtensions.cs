@@ -1,4 +1,5 @@
 ﻿using GovTrackr.DocumentScraping.Worker.Application.Interfaces;
+using GovTrackr.DocumentScraping.Worker.Application.Services;
 using GovTrackr.DocumentScraping.Worker.Configurations.Options;
 using GovTrackr.DocumentScraping.Worker.Consumers;
 using GovTrackr.DocumentScraping.Worker.Infrastructure.Converters;
@@ -20,6 +21,7 @@ internal static class ServiceExtensions
         services.AddConfigOptions(configuration)
             .AddDatabaseService()
             .AddMassTransitWithConsumer()
+            .AddScrapingServices()
             .AddPresidentialActionScraper()
             .AddHtmlToMarkdownConverter()
             .AddPlaywright();
@@ -66,6 +68,14 @@ internal static class ServiceExtensions
                 cfg.ConfigureEndpoints(context);
             });
         });
+
+        return services;
+    }
+
+    private static IServiceCollection AddScrapingServices(this IServiceCollection services)
+    {
+        services.AddKeyedScoped<IScrapingService, PresidentialActionScrapingService>(DocumentCategoryType
+            .PresidentialAction);
 
         return services;
     }
