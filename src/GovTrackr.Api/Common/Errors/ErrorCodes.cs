@@ -11,5 +11,5 @@ public static class ErrorCodes
     public const string PresidentialActionNotFound = "PA001";
 
     // Subscription Error Codes
-    public const string EmailAlreadySubscribedToDigest = "SUB001";
+    public const string EmailAlreadySubscribed = "SUB001";
 }
