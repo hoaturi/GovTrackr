@@ -1,7 +1,6 @@
 ﻿using FluentResults;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Shared.Domain.PresidentialAction;
 using Shared.Infrastructure.Persistence.Context;
 
 namespace GovTrackr.Api.Features.PresidentialAction.GetPresidentialAction;
@@ -27,7 +26,7 @@ public class GetPresidentialActionQueryHandler(AppDbContext dbContext) : IReques
             .FirstOrDefaultAsync(cancellationToken);
 
         return action is null
-            ? Result.Fail(PresidentialActionErrorFactory.PresidentialActionNotFound(request.Id))
+            ? Result.Fail(PresidentialActionError.PresidentialActionNotFound(request.Id))
             : Result.Ok(action);
     }
 }

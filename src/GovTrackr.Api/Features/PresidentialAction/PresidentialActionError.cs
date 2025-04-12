@@ -1,9 +1,8 @@
-﻿using Shared.Abstractions.Errors;
-using Shared.Common.Errors;
+﻿using GovTrackr.Api.Common.Errors;
 
-namespace Shared.Domain.PresidentialAction;
+namespace GovTrackr.Api.Features.PresidentialAction;
 
-public static class PresidentialActionErrorFactory
+public static class PresidentialActionError
 {
     public static NotFoundError PresidentialActionNotFound(Guid id)
     {

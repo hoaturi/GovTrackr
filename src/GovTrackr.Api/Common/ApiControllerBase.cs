@@ -1,6 +1,6 @@
 ﻿using FluentResults;
+using GovTrackr.Api.Common.Errors;
 using Microsoft.AspNetCore.Mvc;
-using Shared.Common.Errors;
 
 namespace GovTrackr.Api.Common;
 

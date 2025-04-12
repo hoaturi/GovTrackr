@@ -1,6 +1,6 @@
 ﻿using Shared.Abstractions.Errors;
 
-namespace Shared.Common.Errors;
+namespace GovTrackr.Api.Common.Errors;
 
 public sealed class NotFoundError : ApplicationError
 {

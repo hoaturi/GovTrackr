@@ -18,8 +18,4 @@
         <ProjectReference Include="..\GovTrackr.ServiceDefaults\GovTrackr.ServiceDefaults.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Application\"/>
-    </ItemGroup>
-
 </Project>
