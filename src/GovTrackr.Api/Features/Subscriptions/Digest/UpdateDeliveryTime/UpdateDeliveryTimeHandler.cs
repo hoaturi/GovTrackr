@@ -9,7 +9,6 @@ namespace GovTrackr.Api.Features.Subscriptions.Digest.UpdateDeliveryTime;
 public class UpdateDeliveryTimeHandler(AppDbContext dbContext)
     : IRequestHandler<UpdateDeliveryTimeCommand, Result<Unit>>
 {
-
     public async Task<Result<Unit>> Handle(UpdateDeliveryTimeCommand request, CancellationToken cancellationToken)
     {
         var subscription = await dbContext.DigestSubscriptions
@@ -17,7 +16,8 @@ public class UpdateDeliveryTimeHandler(AppDbContext dbContext)
 
         if (subscription is null) return Result.Fail(SubscriptionErrors.SubscriptionNotFound);
 
-        subscription.DeliveryTime = request.Dto.DeliveryTime;
+        subscription.DeliveryTime = request.Dto.Time;
+        subscription.DeliveryFrequency = request.Dto.Frequency;
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok(Unit.Value);

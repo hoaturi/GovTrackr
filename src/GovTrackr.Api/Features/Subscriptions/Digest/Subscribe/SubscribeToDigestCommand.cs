@@ -4,4 +4,5 @@ using Shared.Domain.Subscription;
 
 namespace GovTrackr.Api.Features.Subscriptions.Digest.Subscribe;
 
-public record SubscribeToDigestCommand(string Email, DeliveryTime DeliveryTime) : IRequest<Result<Unit>>;
+public record SubscribeToDigestCommand(string Email, DeliveryTime Time, DeliveryFrequency Frequency)
+    : IRequest<Result<Unit>>;

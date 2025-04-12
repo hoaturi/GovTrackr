@@ -21,7 +21,8 @@ public class SubscribeToDigestCommandHandler(AppDbContext dbContext)
         var subscription = new DigestSubscription
         {
             Email = request.Email,
-            DeliveryTime = request.DeliveryTime,
+            DeliveryTime = request.Time,
+            DeliveryFrequency = request.Frequency,
             UnsubscribeToken = Guid.NewGuid().ToString("N")
         };
 

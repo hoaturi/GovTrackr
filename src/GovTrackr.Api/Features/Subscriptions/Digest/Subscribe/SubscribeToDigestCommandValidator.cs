@@ -8,12 +8,12 @@ public class SubscribeToDigestCommandValidator : AbstractValidator<SubscribeToDi
     {
         RuleFor(x => x.Email)
             .NotEmpty()
-            .WithMessage("Email is required.")
-            .EmailAddress()
-            .WithMessage("Invalid email format.");
+            .EmailAddress();
 
-        RuleFor(x => x.DeliveryTime)
-            .IsInEnum()
-            .WithMessage("Invalid delivery time.");
+        RuleFor(x => x.Time)
+            .IsInEnum();
+
+        RuleFor(x => x.Frequency)
+            .IsInEnum();
     }
 }

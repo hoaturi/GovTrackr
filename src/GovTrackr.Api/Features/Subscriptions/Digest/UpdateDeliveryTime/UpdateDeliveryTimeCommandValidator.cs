@@ -9,7 +9,10 @@ public class UpdateDeliveryTimeCommandValidator : AbstractValidator<UpdateDelive
         RuleFor(x => x.Id)
             .NotEmpty();
 
-        RuleFor(x => x.Dto.DeliveryTime)
+        RuleFor(x => x.Dto.Time)
+            .IsInEnum();
+
+        RuleFor(x => x.Dto.Frequency)
             .IsInEnum();
     }
 }
