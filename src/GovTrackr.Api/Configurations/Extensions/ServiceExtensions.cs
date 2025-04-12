@@ -1,4 +1,6 @@
-﻿using GovTrackr.Application.Configurations.Options;
+﻿using FluentValidation;
+using GovTrackr.Api.Application.Behaviors;
+using GovTrackr.Api.Common.Middleware;
 using GovTrackr.Api.Configurations.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -13,7 +15,9 @@ internal static class ServiceExtensions
     {
         services.AddConfigOptions(configuration)
             .AddDatabaseService()
-            .AddMediatrService();
+            .AddMediatrService()
+            .AddValidators()
+            .AddExceptionHandlers();
 
         return services;
     }
@@ -40,7 +44,26 @@ internal static class ServiceExtensions
 
     private static IServiceCollection AddMediatrService(this IServiceCollection services)
     {
-        services.AddMediatR(config => { config.RegisterServicesFromAssemblyContaining<Program>(); });
+        services.AddMediatR(config =>
+        {
+            config.RegisterServicesFromAssemblyContaining<Program>();
+            config.AddOpenBehavior(typeof(ValidationBehavior<,>));
+        });
+
+        return services;
+    }
+
+    private static IServiceCollection AddValidators(this IServiceCollection services)
+    {
+        services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+
+        return services;
+    }
+
+    private static IServiceCollection AddExceptionHandlers(this IServiceCollection services)
+    {
+        services.AddExceptionHandler<GlobalExceptionHandler>();
+        services.AddProblemDetails();
 
         return services;
     }
