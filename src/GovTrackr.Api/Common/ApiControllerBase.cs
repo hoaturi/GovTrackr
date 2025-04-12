@@ -36,6 +36,7 @@ public abstract class ApiControllerBase : ControllerBase
         return error switch
         {
             NotFoundError => StatusCodes.Status404NotFound,
+            ConflictError => StatusCodes.Status409Conflict,
             _ => StatusCodes.Status500InternalServerError
         };
     }
