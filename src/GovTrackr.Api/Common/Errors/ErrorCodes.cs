@@ -12,4 +12,5 @@ public static class ErrorCodes
 
     // Subscription Error Codes
     public const string EmailAlreadySubscribed = "SUB001";
+    public const string SubscriptionNotFound = "SUB002";
 }
