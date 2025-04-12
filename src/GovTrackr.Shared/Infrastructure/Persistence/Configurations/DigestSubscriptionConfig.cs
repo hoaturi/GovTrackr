@@ -18,9 +18,15 @@ public class DigestSubscriptionConfig : IEntityTypeConfiguration<DigestSubscript
         builder.Property(x => x.DeliveryTime)
             .IsRequired();
 
+        builder.Property(x => x.UnsubscribeToken)
+            .IsRequired()
+            .HasMaxLength(255);
+
         builder.HasIndex(x => x.Email)
             .IsUnique();
 
         builder.HasIndex(x => x.DeliveryTime);
+        builder.HasIndex(x => x.UnsubscribeToken)
+            .IsUnique();
     }
 }

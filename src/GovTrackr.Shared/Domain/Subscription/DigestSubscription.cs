@@ -7,6 +7,7 @@ public class DigestSubscription : BaseEntity
     public Guid Id { get; set; }
     public required string Email { get; set; }
     public required DeliveryTime DeliveryTime { get; set; }
+    public required string UnsubscribeToken { get; set; }
 }
 
 public enum DeliveryTime
