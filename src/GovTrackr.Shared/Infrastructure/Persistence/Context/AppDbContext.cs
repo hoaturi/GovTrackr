@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Shared.Domain.Common;
 using Shared.Domain.PresidentialAction;
+using Shared.Domain.Subscription;
 
 namespace Shared.Infrastructure.Persistence.Context;
 
@@ -11,6 +12,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<DocumentSubCategory> DocumentSubCategories { get; set; }
     public DbSet<DocumentCategory> DocumentCategories { get; set; }
     public DbSet<Keyword> Keywords { get; set; }
+    public DbSet<DigestSubscription> DigestSubscriptions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
