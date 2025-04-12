@@ -76,7 +76,6 @@ public class PresidentialActionTranslationService(
         if (newKeywords.Count <= 0) return existingMap.Values.Concat(newKeywords.Select(k => k.Id)).ToList();
 
         dbContext.Keywords.AddRange(newKeywords);
-        await dbContext.SaveChangesAsync(cancellationToken);
 
         return existingMap.Values.Concat(newKeywords.Select(k => k.Id)).ToList();
     }
