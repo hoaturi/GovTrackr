@@ -7,7 +7,7 @@ FORMAT:
 
 - title: Formal Korean version of DOCUMENT_INPUT_TITLE.
 - summary: 2–4 sentence Korean summary in Kyejoshik style (명사형 / -함 / -음), reflecting purpose, background, and goals
-  from source only.
+  from source only. DO NOT start with "본 행정명령은", "본 문서는", or similar phrases.
 - details: Markdown string with two sections:
   주요 조치 사항
     * Each bullet = specific directive or action from the source.
