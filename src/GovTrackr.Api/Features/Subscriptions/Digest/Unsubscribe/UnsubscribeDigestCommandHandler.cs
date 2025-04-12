@@ -6,7 +6,7 @@ using Shared.Infrastructure.Persistence.Context;
 
 namespace GovTrackr.Api.Features.Subscriptions.Digest.Unsubscribe;
 
-public class UnsubscribeDigestCommandHandler(AppDbContext dbContext, ILogger<UnsubscribeDigestCommandHandler> logger)
+public class UnsubscribeDigestCommandHandler(AppDbContext dbContext)
     : IRequestHandler<UnsubscribeDigestCommand, Result<Unit>>
 {
 
