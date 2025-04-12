@@ -1,8 +1,8 @@
-﻿using Shared.Abstractions.Errors;
+﻿using Shared.Common.Errors;
 
 namespace GovTrackr.Api.Common.Errors;
 
-public sealed class NotFoundError : ApplicationError
+public sealed class NotFoundError : ResultError
 {
     public NotFoundError(string message = "Resource not found") : base(message)
     {

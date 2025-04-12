@@ -1,6 +1,6 @@
 ﻿using Microsoft.Playwright;
 
-namespace Shared.Abstractions.Browser;
+namespace Shared.Application.Interfaces;
 
 public interface IBrowserService
 {

@@ -7,7 +7,7 @@ using GovTrackr.DocumentScraping.Worker.Infrastructure.Scrapers;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Shared.Abstractions.Browser;
+using Shared.Application.Interfaces;
 using Shared.Domain.Common;
 using Shared.Infrastructure.Browser;
 using Shared.Infrastructure.Persistence.Context;

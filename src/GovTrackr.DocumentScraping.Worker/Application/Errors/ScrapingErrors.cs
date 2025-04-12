@@ -1,8 +1,8 @@
-﻿using Shared.Abstractions.Errors;
+﻿using Shared.Common.Errors;
 
 namespace GovTrackr.DocumentScraping.Worker.Application.Errors;
 
-public class ScrapingError(string message) : ApplicationError(message);
+public class ScrapingError(string message) : ResultError(message);
 
 public static class ScrapingErrors
 {

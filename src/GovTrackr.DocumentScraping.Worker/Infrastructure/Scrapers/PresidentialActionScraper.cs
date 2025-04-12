@@ -5,7 +5,7 @@ using GovTrackr.DocumentScraping.Worker.Application.Dtos;
 using GovTrackr.DocumentScraping.Worker.Application.Errors;
 using GovTrackr.DocumentScraping.Worker.Application.Interfaces;
 using Microsoft.Playwright;
-using Shared.Abstractions.Browser;
+using Shared.Application.Interfaces;
 using Shared.Domain.Common;
 using Shared.MessageContracts;
 

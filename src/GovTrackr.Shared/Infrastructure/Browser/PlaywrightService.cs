@@ -1,5 +1,5 @@
 ﻿using Microsoft.Playwright;
-using Shared.Abstractions.Browser;
+using Shared.Application.Interfaces;
 
 namespace Shared.Infrastructure.Browser;
 

@@ -2,7 +2,7 @@
 using GovTrackr.DocumentDiscovery.Functions.Infrastructure.Strategies.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Playwright;
-using Shared.Abstractions.Browser;
+using Shared.Application.Interfaces;
 using Shared.Domain.Common;
 using Shared.Infrastructure.Persistence.Context;
 using Shared.MessageContracts;

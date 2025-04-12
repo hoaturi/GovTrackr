@@ -1,9 +1,9 @@
 ﻿using System.Net;
-using Shared.Abstractions.Errors;
+using Shared.Common.Errors;
 
 namespace GovTrackr.DocumentTranslation.Worker.Application.Errors;
 
-public sealed class TranslationError(string message) : ApplicationError(message);
+public sealed class TranslationError(string message) : ResultError(message);
 
 public static class TranslationErrors
 {

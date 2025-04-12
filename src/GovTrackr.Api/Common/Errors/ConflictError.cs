@@ -1,8 +1,8 @@
-﻿using Shared.Abstractions.Errors;
+﻿using Shared.Common.Errors;
 
 namespace GovTrackr.Api.Common.Errors;
 
-public class ConflictError : ApplicationError
+public class ConflictError : ResultError
 {
 
     public ConflictError(string message) : base(message)

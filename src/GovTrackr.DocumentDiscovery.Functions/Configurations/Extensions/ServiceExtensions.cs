@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Shared.Abstractions.Browser;
+using Shared.Application.Interfaces;
 using Shared.Infrastructure.Browser;
 using Shared.Infrastructure.Persistence.Context;
 
