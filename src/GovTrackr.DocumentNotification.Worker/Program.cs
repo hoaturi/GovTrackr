@@ -1,7 +1,11 @@
-using GovTrackr.DocumentNotification.Worker;
+using GovTrackr.DocumentNotification.Worker.Configurations.Extensions;
+using GovTrackr.ServiceDefaults;
 
 var builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddHostedService<Worker>();
+
+builder.AddServiceDefaults();
+
+builder.Services.AddAppServices(builder.Configuration);
 
 var host = builder.Build();
 host.Run();
