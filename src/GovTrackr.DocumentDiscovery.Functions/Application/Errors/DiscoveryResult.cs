@@ -1,7 +1,7 @@
 ﻿using Shared.Domain.Common;
 using Shared.MessageContracts;
 
-namespace GovTrackr.DocumentDiscovery.Functions.Infrastructure.Strategies.Models;
+namespace GovTrackr.DocumentDiscovery.Functions.Application.Errors;
 
 internal sealed record DiscoveryResult(
     DocumentCategoryType DocumentCategory,

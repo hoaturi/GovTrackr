@@ -1,4 +1,4 @@
-﻿using GovTrackr.DocumentDiscovery.Functions.Infrastructure.Strategies.Models;
+﻿using GovTrackr.DocumentDiscovery.Functions.Application.Errors;
 
 namespace GovTrackr.DocumentDiscovery.Functions.Application.Interfaces;
 
