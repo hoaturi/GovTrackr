@@ -26,5 +26,8 @@ public class DigestConfig : IEntityTypeConfiguration<Digest>
         builder.HasIndex(x => x.StartDate);
 
         builder.HasIndex(x => x.Interval);
+
+        builder.HasIndex(x => new { x.StartDate, x.EndDate, x.Interval })
+            .IsUnique();
     }
 }
