@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Shared.Domain.Common;
+using Shared.Domain.Digest;
 using Shared.Domain.PresidentialAction;
 using Shared.Domain.Subscription;
 
@@ -13,6 +14,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<DocumentCategory> DocumentCategories { get; set; }
     public DbSet<Keyword> Keywords { get; set; }
     public DbSet<DigestSubscription> DigestSubscriptions { get; set; }
+    public DbSet<Digest> Digests { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
