@@ -1,8 +1,7 @@
 ﻿using FluentResults;
 using MediatR;
-using Shared.Domain.Subscription;
 
-namespace GovTrackr.Api.Features.Subscriptions.Digest.Subscribe;
+namespace GovTrackr.Api.Features.Subscriptions.Digest.SubscribeToDigest;
 
-public record SubscribeToDigestCommand(string Email, DeliveryTime Time, DeliveryFrequency Frequency)
+public record SubscribeToDigestCommand(string Email)
     : IRequest<Result<Unit>>;

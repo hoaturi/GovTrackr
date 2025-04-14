@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GovTrackr.Api.Features.Subscriptions.Digest.Subscribe;
+namespace GovTrackr.Api.Features.Subscriptions.Digest.SubscribeToDigest;
 
 [ApiController]
 [Route("subscriptions/digest")]

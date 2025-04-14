@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GovTrackr.Api.Features.Subscriptions.Digest.Unsubscribe;
+namespace GovTrackr.Api.Features.Subscriptions.Digest.UnsubscribeDigest;
 
 [ApiController]
 [Route("subscriptions/digest")]

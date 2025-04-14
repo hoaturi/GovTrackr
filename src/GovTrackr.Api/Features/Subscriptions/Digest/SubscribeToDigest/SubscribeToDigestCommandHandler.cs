@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Shared.Domain.Subscription;
 using Shared.Infrastructure.Persistence.Context;
 
-namespace GovTrackr.Api.Features.Subscriptions.Digest.Subscribe;
+namespace GovTrackr.Api.Features.Subscriptions.Digest.SubscribeToDigest;
 
 public class SubscribeToDigestCommandHandler(AppDbContext dbContext)
     : IRequestHandler<SubscribeToDigestCommand, Result<Unit>>
@@ -21,8 +21,6 @@ public class SubscribeToDigestCommandHandler(AppDbContext dbContext)
         var subscription = new DigestSubscription
         {
             Email = request.Email,
-            DeliveryTime = request.Time,
-            DeliveryFrequency = request.Frequency,
             UnsubscribeToken = Guid.NewGuid().ToString("N")
         };
 

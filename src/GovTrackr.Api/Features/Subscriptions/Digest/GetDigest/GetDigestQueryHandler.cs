@@ -14,8 +14,6 @@ public class GetDigestQueryHandler(AppDbContext dbContext) : IRequestHandler<Get
             .Where(d => d.Id == request.Id)
             .Select(d => new GetDigestResponse
             {
-                DeliveryTime = d.DeliveryTime,
-                DeliveryFrequency = d.DeliveryFrequency,
                 LastSentAt = d.LastSentAt
             })
             .FirstOrDefaultAsync(cancellationToken);

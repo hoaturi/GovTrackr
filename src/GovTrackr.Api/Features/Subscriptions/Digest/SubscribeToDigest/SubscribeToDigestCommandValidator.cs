@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace GovTrackr.Api.Features.Subscriptions.Digest.Subscribe;
+namespace GovTrackr.Api.Features.Subscriptions.Digest.SubscribeToDigest;
 
 public class SubscribeToDigestCommandValidator : AbstractValidator<SubscribeToDigestCommand>
 {
@@ -9,11 +9,5 @@ public class SubscribeToDigestCommandValidator : AbstractValidator<SubscribeToDi
         RuleFor(x => x.Email)
             .NotEmpty()
             .EmailAddress();
-
-        RuleFor(x => x.Time)
-            .IsInEnum();
-
-        RuleFor(x => x.Frequency)
-            .IsInEnum();
     }
 }

@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace GovTrackr.Api.Features.Subscriptions.Digest.Unsubscribe;
+namespace GovTrackr.Api.Features.Subscriptions.Digest.UnsubscribeDigest;
 
 public class UnsubscribeDigestCommandValidator : AbstractValidator<UnsubscribeDigestCommand>
 {

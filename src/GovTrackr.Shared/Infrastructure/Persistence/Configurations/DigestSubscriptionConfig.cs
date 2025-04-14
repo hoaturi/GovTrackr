@@ -15,15 +15,16 @@ public class DigestSubscriptionConfig : IEntityTypeConfiguration<DigestSubscript
             .IsRequired()
             .HasMaxLength(255);
 
-        builder.Property(x => x.DeliveryTime)
-            .IsRequired();
-
-        builder.Property(x => x.DeliveryFrequency)
-            .IsRequired();
-
         builder.Property(x => x.UnsubscribeToken)
             .IsRequired()
             .HasMaxLength(255);
+
+        builder.Property(x => x.Status)
+            .IsRequired()
+            .HasConversion<string>();
+
+        builder.Property(x => x.StatusChangedAt)
+            .IsRequired(false);
 
         builder.Property(x => x.LastSentAt)
             .IsRequired(false);
@@ -31,10 +32,10 @@ public class DigestSubscriptionConfig : IEntityTypeConfiguration<DigestSubscript
         builder.HasIndex(x => x.Email)
             .IsUnique();
 
-        builder.HasIndex(x => new
-            { x.DeliveryTime, x.DeliveryFrequency, x.LastSentAt });
-
         builder.HasIndex(x => x.UnsubscribeToken)
             .IsUnique();
+
+        builder.HasIndex(x => x.Status)
+            .IsUnique(false);
     }
 }

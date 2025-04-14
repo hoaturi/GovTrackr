@@ -2,9 +2,10 @@
 using GovTrackr.Api.Features.Subscriptions.Errors;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Shared.Domain.Subscription;
 using Shared.Infrastructure.Persistence.Context;
 
-namespace GovTrackr.Api.Features.Subscriptions.Digest.Unsubscribe;
+namespace GovTrackr.Api.Features.Subscriptions.Digest.UnsubscribeDigest;
 
 public class UnsubscribeDigestCommandHandler(AppDbContext dbContext)
     : IRequestHandler<UnsubscribeDigestCommand, Result<Unit>>
@@ -17,7 +18,8 @@ public class UnsubscribeDigestCommandHandler(AppDbContext dbContext)
 
         if (subscription is null) return Result.Fail(SubscriptionErrors.SubscriptionNotFound);
 
-        dbContext.DigestSubscriptions.Remove(subscription);
+        subscription.Status = DigestSubscriptionStatus.Inactive;
+        subscription.StatusChangedAt = DateTime.UtcNow;
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok(Unit.Value);
