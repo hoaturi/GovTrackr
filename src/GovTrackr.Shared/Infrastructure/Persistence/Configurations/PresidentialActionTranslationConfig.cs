@@ -25,11 +25,13 @@ public class PresidentialActionTranslationConfig : IEntityTypeConfiguration<Pres
         builder.HasIndex(t => t.PresidentialActionId)
             .IsUnique();
 
-        builder.Property(t => t.KeywordIds).IsRequired();
-
         builder.HasOne(t => t.PresidentialAction)
             .WithOne(p => p.Translation)
             .HasForeignKey<PresidentialActionTranslation>(t => t.PresidentialActionId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(t => t.Keywords)
+            .WithMany(k => k.PresidentialActionTranslations)
+            .UsingEntity(j => j.ToTable("PresidentialActionTranslationKeywords"));
     }
 }

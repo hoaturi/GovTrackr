@@ -40,7 +40,7 @@ public class PresidentialActionTranslationService(
         TranslatedPresidentialActionDto dto,
         CancellationToken cancellationToken)
     {
-        var keywordIds = await GetOrCreateKeywordIdsAsync(dto.Keywords, cancellationToken);
+        var keywordsToAssociate = await GetOrCreateKeywordsAsync(dto.Keywords, cancellationToken);
 
         dbContext.PresidentialActionTranslations.Add(new PresidentialActionTranslation
         {
@@ -48,35 +48,43 @@ public class PresidentialActionTranslationService(
             Summary = dto.Summary,
             Content = dto.Details,
             PresidentialActionId = document.Id,
-            KeywordIds = keywordIds
+            Keywords = keywordsToAssociate
         });
 
         document.TranslationStatus = TranslationStatus.Completed;
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task<List<int>> GetOrCreateKeywordIdsAsync(
-        List<string> keywords,
+    private async Task<List<Keyword>> GetOrCreateKeywordsAsync(
+        List<string> keywordNames,
         CancellationToken cancellationToken)
     {
-        var trimmed = keywords.Select(k => k.Trim()).Distinct().ToList();
+        if (keywordNames.Count == 0) return [];
 
-        var existing = await dbContext.Keywords
-            .AsNoTracking()
-            .Where(k => trimmed.Contains(k.Name))
-            .ToListAsync(cancellationToken);
-
-        var existingMap = existing.ToDictionary(k => k.Name, k => k.Id);
-
-        var newKeywords = trimmed
-            .Where(k => !existingMap.ContainsKey(k))
-            .Select(k => new Keyword { Name = k })
+        var normalizedKeywords = keywordNames
+            .Select(k => k.Trim())
+            .Where(k => !string.IsNullOrEmpty(k))
+            .Distinct()
             .ToList();
 
-        if (newKeywords.Count <= 0) return existingMap.Values.Concat(newKeywords.Select(k => k.Id)).ToList();
+        if (normalizedKeywords.Count == 0) return [];
 
+        var existingKeywords = await dbContext.Keywords
+            .Where(k => normalizedKeywords.Contains(k.Name))
+            .ToListAsync(cancellationToken);
+
+        var existingKeywordNames = existingKeywords.Select(k => k.Name).ToHashSet();
+
+        var newKeywordNames = normalizedKeywords
+            .Where(k => !existingKeywordNames.Contains(k))
+            .ToList();
+
+        List<Keyword> newKeywords = [];
+        if (newKeywordNames.Count <= 0) return existingKeywords.Concat(newKeywords).ToList();
+
+        newKeywords = newKeywordNames.Select(name => new Keyword { Name = name }).ToList();
         dbContext.Keywords.AddRange(newKeywords);
 
-        return existingMap.Values.Concat(newKeywords.Select(k => k.Id)).ToList();
+        return existingKeywords.Concat(newKeywords).ToList();
     }
 }

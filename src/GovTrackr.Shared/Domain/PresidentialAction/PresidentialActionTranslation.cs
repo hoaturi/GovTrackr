@@ -7,8 +7,8 @@ public class PresidentialActionTranslation : BaseEntity
     public Guid Id { get; set; }
     public Guid PresidentialActionId { get; set; }
     public PresidentialAction PresidentialAction { get; set; } = null!;
-    public List<int> KeywordIds { get; set; } = [];
     public required string Title { get; set; }
     public required string Content { get; set; }
     public required string Summary { get; set; }
+    public List<Keyword> Keywords { get; set; } = [];
 }
