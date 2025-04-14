@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "GovTrackr.Digest.Functions": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7052",
+      "launchBrowser": false
+    }
+  }
+}
