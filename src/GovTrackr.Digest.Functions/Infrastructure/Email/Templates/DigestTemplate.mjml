@@ -75,7 +75,7 @@
                     </h3>
                 </mj-text>
                 <mj-text padding-top="5px" padding-bottom="5px">
-                    * <strong>📅 발행일:</strong> {{ action.published_at }}
+                    * <strong>📅 발행일:</strong> {{ action.published_at }} (현지시간)
                     <br/>
                     *
                     <strong>🔗 원문 출처:</strong>

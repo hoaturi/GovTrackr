@@ -95,7 +95,7 @@ public class DigestContentBuilder(AppDbContext dbContext, IOptions<EmailOptions>
 
             sb.AppendLine($"### 📄 [{action.Title}]({detailedSummaryUrl})");
             sb.AppendLine();
-            sb.AppendLine($"* **📅 발행일:** {action.PublishedAt:yyyy-MM-dd}");
+            sb.AppendLine($"* **📅 발행일:** {action.PublishedAt:yyyy-MM-dd} (현지 시간)");
             sb.AppendLine($"* **🔗 원문 출처:** [원본 문서 링크]({action.SourceUrl})");
 
             var summaryText = string.IsNullOrWhiteSpace(action.Summary)
