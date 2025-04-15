@@ -100,7 +100,7 @@
                     <br/>
                     이 메일은 정보 제공 목적으로 발송되었습니다.
                     <br/>
-                    <a href="{{ unsubscribe_token }}">수신 거부</a>
+                    <a href="[unsubscribe_url]">수신 거부</a>
                 </mj-text>
             </mj-column>
         </mj-section>

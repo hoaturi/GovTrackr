@@ -56,7 +56,7 @@ public class DigestService(
 
         foreach (var subscription in subscriptions)
         {
-            var unsubscribeUrl = $"${_emailOptions.BaseUrl}/unsubscribe/{subscription.Id}";
+            var unsubscribeUrl = $"{_emailOptions.BaseUrl}/unsubscribe/{subscription.Id}";
             var personalizedTemplate = emailBuilder.InjectUnsubscribeLink(emailTemplate, unsubscribeUrl);
 
             var result =

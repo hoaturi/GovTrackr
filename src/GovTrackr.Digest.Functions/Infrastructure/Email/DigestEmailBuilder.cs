@@ -38,9 +38,10 @@ public class DigestEmailBuilder : IDigestEmailBuilder
         return renderResult.Html;
     }
 
-    public string InjectUnsubscribeLink(string template, string token)
+    public string InjectUnsubscribeLink(string template, string url)
     {
-        return template.Replace("{{unsubscribe_token}}", token);
+        // Avoid {{ unsubscribe_url }} because Scriban removes it if not set in the model.
+        return template.Replace("[unsubscribe_url]", url);
     }
 
     private static object CreateTemplateModel(DigestEmailTemplateDto dto)

@@ -6,5 +6,5 @@ public interface IDigestEmailBuilder
 {
     Task<string> GetDigestContentAsync(DigestEmailTemplateDto dto, CancellationToken cancellationToken);
 
-    string InjectUnsubscribeLink(string template, string token);
+    string InjectUnsubscribeLink(string template, string url);
 }
