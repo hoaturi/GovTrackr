@@ -1,11 +1,14 @@
-﻿using Amazon.SimpleEmailV2;
+﻿using Amazon;
+using Amazon.SimpleEmailV2;
 using GovTrackr.Digest.Functions.Application.Interfaces;
+using GovTrackr.Digest.Functions.Application.Services;
 using GovTrackr.Digest.Functions.Configurations.Options;
-using GovTrackr.Digest.Functions.Infrastructure.Services;
+using GovTrackr.Digest.Functions.Infrastructure.Email;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Mjml.Net;
 using Shared.Infrastructure.Persistence.Context;
 
 namespace GovTrackr.Digest.Functions.Configurations.Extensions;
@@ -16,8 +19,11 @@ public static class ServiceExtensions
     {
         services.AddConfigOptions(configuration)
             .AddDatabaseService()
-            .AddEmailService();
-            .AddDigestContentBuilder();
+            .AddEmailService()
+            .AddDigestContentBuilder()
+            .AddDigestService()
+            .AddDigestEmailBuilder()
+            .AddMjmlService();
 
         return services;
     }
@@ -26,6 +32,14 @@ public static class ServiceExtensions
     {
         services.AddOptionsWithValidateOnStart<ConnectionStringsOptions>()
             .Bind(configuration.GetSection(ConnectionStringsOptions.SectionName))
+            .ValidateDataAnnotations();
+
+        services.AddOptionsWithValidateOnStart<AwsOptions>()
+            .Bind(configuration.GetSection(AwsOptions.SectionName))
+            .ValidateDataAnnotations();
+
+        services.AddOptionsWithValidateOnStart<EmailOptions>()
+            .Bind(configuration.GetSection(EmailOptions.SectionName))
             .ValidateDataAnnotations();
 
         return services;
@@ -48,11 +62,14 @@ public static class ServiceExtensions
         services.AddSingleton<AmazonSimpleEmailServiceV2Client>(sp =>
         {
             var awsOptions = sp.GetRequiredService<IOptions<AwsOptions>>().Value;
-            return new AmazonSimpleEmailServiceV2Client(awsOptions.AccessKey, awsOptions.SecretKey);
+            return new AmazonSimpleEmailServiceV2Client(awsOptions.AccessKey, awsOptions.SecretKey,
+                RegionEndpoint.APNortheast2);
         });
 
         services.AddSingleton<IEmailService, EmailService>();
 
+        return services;
+    }
 
     private static IServiceCollection AddDigestContentBuilder(this IServiceCollection services)
     {
@@ -60,6 +77,25 @@ public static class ServiceExtensions
 
         return services;
     }
+
+    private static IServiceCollection AddDigestService(this IServiceCollection services)
+    {
+        services.AddScoped<IDigestService, DigestService>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddDigestEmailBuilder(this IServiceCollection services)
+    {
+        services.AddSingleton<IDigestEmailBuilder, DigestEmailBuilder>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddMjmlService(this IServiceCollection services)
+    {
+        services.AddSingleton<IMjmlRenderer, MjmlRenderer>(_ => new MjmlRenderer());
+
         return services;
     }
 }
