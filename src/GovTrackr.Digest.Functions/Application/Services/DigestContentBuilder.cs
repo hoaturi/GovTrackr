@@ -121,7 +121,7 @@ public class DigestContentBuilder(AppDbContext dbContext, IOptions<EmailOptions>
         return await dbContext.PresidentialActionTranslations
             .Where(x => x.PresidentialAction.PublishedAt >= startDate
                         && x.PresidentialAction.PublishedAt <= endDate)
-            .OrderBy(x => x.PresidentialAction.PublishedAt)
+            .OrderByDescending(x => x.PresidentialAction.PublishedAt)
             .Select(x => new PresidentialActionDto(
                 x.Id,
                 x.Title,
