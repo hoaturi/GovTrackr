@@ -17,6 +17,7 @@ public static class ServiceExtensions
         services.AddConfigOptions(configuration)
             .AddDatabaseService()
             .AddEmailService();
+            .AddDigestContentBuilder();
 
         return services;
     }
@@ -52,6 +53,13 @@ public static class ServiceExtensions
 
         services.AddSingleton<IEmailService, EmailService>();
 
+
+    private static IServiceCollection AddDigestContentBuilder(this IServiceCollection services)
+    {
+        services.AddScoped<IDigestContentBuilder, DigestContentBuilder>();
+
+        return services;
+    }
         return services;
     }
 }
