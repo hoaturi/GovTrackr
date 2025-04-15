@@ -1,14 +1,18 @@
 ﻿using System.Text;
 using GovTrackr.Digest.Functions.Application.Dtos;
 using GovTrackr.Digest.Functions.Application.Interfaces;
+using GovTrackr.Digest.Functions.Configurations.Options;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Shared.Domain.Digest;
 using Shared.Infrastructure.Persistence.Context;
 
 namespace GovTrackr.Digest.Functions.Application.Services;
 
-public class DigestContentBuilder(AppDbContext dbContext) : IDigestContentBuilder
+public class DigestContentBuilder(AppDbContext dbContext, IOptions<EmailOptions> emailOptions) : IDigestContentBuilder
 {
+    private readonly EmailOptions _emailOptions = emailOptions.Value;
+
     public async Task<string?> BuildMarkdownDigestContentAsync(CancellationToken cancellationToken)
     {
         var dateRange = GetDigestDateRange();
@@ -62,39 +66,28 @@ public class DigestContentBuilder(AppDbContext dbContext) : IDigestContentBuilde
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private static string GenerateMarkdownDigest(List<PresidentialActionDto> presidentialActions, DateTime startDate)
+    private string GenerateMarkdownDigest(List<PresidentialActionDto> presidentialActions, DateTime startDate)
     {
         var sb = new StringBuilder();
         var today = DateTime.UtcNow;
 
         AppendHeader(sb, startDate, today);
-
-        if (presidentialActions.Count == 0)
-            AppendNoDocumentsMessage(sb);
-        else
-            AppendDocuments(sb, presidentialActions);
+        AppendDocuments(sb, presidentialActions);
 
         return sb.ToString();
     }
 
     private static void AppendHeader(StringBuilder sb, DateTime startDate, DateTime today)
     {
-        sb.AppendLine($"# 📰 주간 정부 문서 번역 다이제스트 ({startDate:yyyy-M-d dddd} - {today:yyyy-M-d dddd})");
+        sb.AppendLine($"# 📰 주간 미 정부 발표 요약 다이제스트 ({startDate:yyyy-M-d dddd} - {today:yyyy-M-d dddd})");
         sb.AppendLine();
-        sb.AppendLine("이번 주에 번역 및 요약된 주요 문서입니다. 각 제목을 클릭하시면 상세 요약 페이지로 이동합니다.");
+        sb.AppendLine("이번 주에 번역 및 요약된 미 정부 발표에 대한 주요 내용입니다. 각 제목을 클릭하시면 상세 요약 페이지로 이동합니다.");
         sb.AppendLine();
         sb.AppendLine("---");
         sb.AppendLine();
     }
 
-    private static void AppendNoDocumentsMessage(StringBuilder sb)
-    {
-        sb.AppendLine("이번 주에는 새로 번역된 문서가 없습니다.");
-        sb.AppendLine();
-        sb.AppendLine("---");
-    }
-
-    private static void AppendDocuments(StringBuilder sb, List<PresidentialActionDto> presidentialActions)
+    private void AppendDocuments(StringBuilder sb, List<PresidentialActionDto> presidentialActions)
     {
         foreach (var action in presidentialActions)
         {
@@ -104,7 +97,6 @@ public class DigestContentBuilder(AppDbContext dbContext) : IDigestContentBuilde
             sb.AppendLine();
             sb.AppendLine($"* **📅 발행일:** {action.PublishedAt:yyyy-MM-dd}");
             sb.AppendLine($"* **🔗 원문 출처:** [원본 문서 링크]({action.SourceUrl})");
-            sb.AppendLine("* **\ud83d\udcdd 요약:**");
 
             var summaryText = string.IsNullOrWhiteSpace(action.Summary)
                 ? "요약 정보가 없습니다."
@@ -116,10 +108,9 @@ public class DigestContentBuilder(AppDbContext dbContext) : IDigestContentBuilde
         }
     }
 
-    private static string GenerateDetailedSummaryUrl(PresidentialActionDto action)
+    private string GenerateDetailedSummaryUrl(PresidentialActionDto action)
     {
-        // TODO: Change this to the actual Base URL
-        return $"https://www.govtrackr.com/presidential-actions/{action.Id}";
+        return $"${_emailOptions.BaseUrl}/presidential-actions/{action.Id}";
     }
 
     private async Task<List<PresidentialActionDto>> GetPresidentialActionsAsync(
