@@ -26,9 +26,6 @@ public class DigestSubscriptionConfig : IEntityTypeConfiguration<DigestSubscript
         builder.Property(x => x.StatusChangedAt)
             .IsRequired(false);
 
-        builder.Property(x => x.LastSentAt)
-            .IsRequired(false);
-
         builder.HasIndex(x => x.Email)
             .IsUnique();
 

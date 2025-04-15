@@ -32,8 +32,8 @@ public class DigestEmailService(
 
         var emailSubject =
             $"📰 주간 미 정부 발표 요약 다이제스트 ({dateRange.startDate:yyyy-MM-dd} ~ {dateRange.endDate:yyyy-MM-dd})";
-        var emailTemplate = await BuildEmailTemplateAsync(presidentialActions, dateRange, cancellationToken);
-        await ProcessDigestEmailsAsync(subscriptions, emailSubject, emailTemplate, cancellationToken);
+        var emailContent = await BuildEmailTemplateAsync(presidentialActions, dateRange, cancellationToken);
+        await ProcessDigestEmailsAsync(subscriptions, emailSubject, emailContent, cancellationToken);
     }
 
     private async Task<string> BuildEmailTemplateAsync(
@@ -46,12 +46,11 @@ public class DigestEmailService(
     }
 
     private async Task ProcessDigestEmailsAsync(
-        List<DigestSubscription> subscriptions,
+        List<SubscriptionDto> subscriptions,
         string emailSubject,
         string emailTemplate,
         CancellationToken cancellationToken)
     {
-        var now = DateTime.UtcNow;
         var failedCount = 0;
 
         foreach (var subscription in subscriptions)
@@ -63,16 +62,8 @@ public class DigestEmailService(
                 await emailService.SendEmailAsync(subscription.Email, emailSubject, personalizedTemplate,
                     cancellationToken);
 
-            if (!result)
-            {
-                failedCount++;
-                continue;
-            }
-
-            subscription.LastSentAt = now;
+            if (!result) failedCount++;
         }
-
-        await dbContext.SaveChangesAsync(cancellationToken);
 
         if (failedCount > 0)
             logger.LogWarning("Digest sent with {FailedCount} failures out of {TotalCount} subscribers.", failedCount,
@@ -81,15 +72,12 @@ public class DigestEmailService(
             logger.LogInformation("Digest sent successfully to all {TotalCount} subscribers.", subscriptions.Count);
     }
 
-    private async Task<List<DigestSubscription>> GetSubscriptionsAsync(CancellationToken cancellationToken)
+    private async Task<List<SubscriptionDto>> GetSubscriptionsAsync(CancellationToken cancellationToken)
     {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-        var cutoffDate = today.AddDays(-DigestPeriodDays);
-
         return await dbContext.DigestSubscriptions
             .Where(x => x.Status == DigestSubscriptionStatus.Active
-                        && (x.LastSentAt == null ||
-                            DateOnly.FromDateTime(x.LastSentAt.Value) < cutoffDate))
+            )
+            .Select(x => new SubscriptionDto(x.Id, x.Email, x.UnsubscribeToken))
             .ToListAsync(cancellationToken);
     }
 
