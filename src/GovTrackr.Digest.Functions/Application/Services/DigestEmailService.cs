@@ -9,13 +9,13 @@ using Shared.Infrastructure.Persistence.Context;
 
 namespace GovTrackr.Digest.Functions.Application.Services;
 
-public class DigestService(
+public class DigestEmailService(
     AppDbContext dbContext,
     IDigestEmailBuilder emailBuilder,
     IEmailService emailService,
     IOptions<EmailOptions> emailOptions,
-    ILogger<DigestService> logger)
-    : IDigestService
+    ILogger<DigestEmailService> logger)
+    : IDigestEmailService
 {
     private const int DigestPeriodDays = 7;
     private readonly EmailOptions _emailOptions = emailOptions.Value;

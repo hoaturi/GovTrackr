@@ -3,7 +3,7 @@ using GovTrackr.Digest.Functions.Application.Interfaces;
 using Mjml.Net;
 using Scriban;
 
-namespace GovTrackr.Digest.Functions.Infrastructure.Email;
+namespace GovTrackr.Digest.Functions.Application.Builders;
 
 public class DigestEmailBuilder : IDigestEmailBuilder
 {

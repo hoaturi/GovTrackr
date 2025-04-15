@@ -1,5 +1,6 @@
 ﻿using Amazon;
 using Amazon.SimpleEmailV2;
+using GovTrackr.Digest.Functions.Application.Builders;
 using GovTrackr.Digest.Functions.Application.Interfaces;
 using GovTrackr.Digest.Functions.Application.Services;
 using GovTrackr.Digest.Functions.Configurations.Options;
@@ -20,10 +21,8 @@ public static class ServiceExtensions
         services.AddConfigOptions(configuration)
             .AddDatabaseService()
             .AddEmailService()
-            .AddDigestContentBuilder()
-            .AddDigestService()
-            .AddDigestEmailBuilder()
-            .AddMjmlService();
+            .AddDigestMarkdownService()
+            .AddDigestEmailService();
 
         return services;
     }
@@ -71,30 +70,19 @@ public static class ServiceExtensions
         return services;
     }
 
-    private static IServiceCollection AddDigestContentBuilder(this IServiceCollection services)
+    private static IServiceCollection AddDigestMarkdownService(this IServiceCollection services)
     {
-        services.AddScoped<IDigestContentBuilder, DigestContentBuilder>();
+        services.AddSingleton<IDigestMarkdownBuilder, DigestMarkdownBuilder>();
+        services.AddScoped<IDigestMarkdownService, DigestMarkdownService>();
 
         return services;
     }
 
-    private static IServiceCollection AddDigestService(this IServiceCollection services)
-    {
-        services.AddScoped<IDigestService, DigestService>();
-
-        return services;
-    }
-
-    private static IServiceCollection AddDigestEmailBuilder(this IServiceCollection services)
-    {
-        services.AddSingleton<IDigestEmailBuilder, DigestEmailBuilder>();
-
-        return services;
-    }
-
-    private static IServiceCollection AddMjmlService(this IServiceCollection services)
+    private static IServiceCollection AddDigestEmailService(this IServiceCollection services)
     {
         services.AddSingleton<IMjmlRenderer, MjmlRenderer>(_ => new MjmlRenderer());
+        services.AddSingleton<IDigestEmailBuilder, DigestEmailBuilder>();
+        services.AddScoped<IDigestEmailService, DigestEmailService>();
 
         return services;
     }

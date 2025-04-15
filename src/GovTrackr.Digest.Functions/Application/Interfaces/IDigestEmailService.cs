@@ -1,7 +1,7 @@
 ﻿namespace GovTrackr.Digest.Functions.Application.Interfaces;
 
-public interface IDigestContentBuilder
+public interface IDigestEmailService
 {
-    Task<string?> BuildMarkdownDigestContentAsync(
+    Task SendDigestEmailAsync(
         CancellationToken cancellationToken);
 }
