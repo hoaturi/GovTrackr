@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Shared.Domain.Common;
 using Shared.Domain.Digest;
+using Shared.Domain.Notification;
 using Shared.Domain.PresidentialAction;
 using Shared.Domain.Subscription;
 
@@ -15,6 +16,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Keyword> Keywords { get; set; }
     public DbSet<DigestSubscription> DigestSubscriptions { get; set; }
     public DbSet<Digest> Digests { get; set; }
+    public DbSet<PushToken> PushTokens { get; set; }
+    public DbSet<PushPreference> PushPreferences { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

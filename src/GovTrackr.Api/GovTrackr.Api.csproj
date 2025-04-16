@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="FirebaseAdmin"/>
         <PackageReference Include="FluentResults"/>
         <PackageReference Include="FluentValidation"/>
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions"/>
@@ -18,6 +19,10 @@
     <ItemGroup>
         <ProjectReference Include="..\GovTrackr.Shared\GovTrackr.Shared.csproj"/>
         <ProjectReference Include="..\GovTrackr.ServiceDefaults\GovTrackr.ServiceDefaults.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="govtrackr-dev-adminsdk.json"/>
     </ItemGroup>
 
 </Project>
