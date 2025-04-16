@@ -29,8 +29,4 @@ builder.AddProject<GovTrackr_DocumentTranslation_Worker>("GovTrackrDocumentTrans
     .WithReference(database)
     .WaitFor(database);
 
-builder.AddProject<GovTrackr_DocumentNotification_Worker>("GovTrackrDocumentNotificationWorker")
-    .WithReference(database)
-    .WaitFor(database);
-
 builder.Build().Run();

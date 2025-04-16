@@ -21,7 +21,6 @@
         <ProjectReference Include="..\GovTrackr.DocumentTranslation.Worker\GovTrackr.DocumentTranslation.Worker.csproj"/>
         <ProjectReference Include="..\GovTrackr.MigrationService\GovTrackr.MigrationService.csproj"/>
         <ProjectReference Include="..\GovTrackr.DocumentScraping.Worker\GovTrackr.DocumentScraping.Worker.csproj"/>
-        <ProjectReference Include="..\GovTrackr.DocumentNotification.Worker\GovTrackr.DocumentNotification.Worker.csproj"/>
     </ItemGroup>
 
 </Project>
