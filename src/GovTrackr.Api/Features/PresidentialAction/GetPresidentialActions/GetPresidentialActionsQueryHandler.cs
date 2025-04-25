@@ -39,7 +39,7 @@ public class
                 a.PresidentialAction.Title,
                 a.PresidentialAction.SourceUrl,
                 a.PresidentialAction.PublishedAt,
-                a.PresidentialAction.SubCategory.Name
+                a.PresidentialAction.SubCategory.Id
             ))
             .ToListAsync(cancellationToken);
 

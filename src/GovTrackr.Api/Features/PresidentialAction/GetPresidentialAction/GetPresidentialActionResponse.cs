@@ -2,8 +2,8 @@
 
 public record GetPresidentialActionResponse(
     Guid Id,
-    string Category,
-    string SubCategory,
+    int Category,
+    int SubCategory,
     string Title,
     string Content,
     DateTime PublishedAt,

@@ -15,8 +15,8 @@ public class GetPresidentialActionQueryHandler(AppDbContext dbContext) : IReques
             .Where(x => x.Id == request.Id)
             .Select(x => new GetPresidentialActionResponse(
                 x.Id,
-                x.PresidentialAction.SubCategory.Category.Name,
-                x.PresidentialAction.SubCategory.Name,
+                x.PresidentialAction.SubCategory.Category.Id,
+                x.PresidentialAction.SubCategory.Id,
                 x.Title,
                 x.Content,
                 x.PresidentialAction.PublishedAt,

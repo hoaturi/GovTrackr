@@ -13,5 +13,5 @@ public record GetPresidentialActionsItem(
     string SourceTitle,
     string SourceUrl,
     DateTime PublishedAt,
-    string SubCategory
+    int SubCategory
 );
