@@ -14,6 +14,7 @@ internal static class ServiceExtensions
         IConfiguration configuration)
     {
         services.AddConfigOptions(configuration)
+            .AddCorsOption(configuration)
             .AddDatabaseService()
             .AddMediatrService()
             .AddValidators()
@@ -27,6 +28,23 @@ internal static class ServiceExtensions
         services.AddOptionsWithValidateOnStart<ConnectionStringsOptions>()
             .Bind(configuration.GetSection(ConnectionStringsOptions.SectionName))
             .ValidateDataAnnotations();
+
+        return services;
+    }
+
+    private static IServiceCollection AddCorsOption(this IServiceCollection services, IConfiguration configuration)
+    {
+        var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.WithOrigins(allowedOrigins ?? [])
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
 
         return services;
     }
