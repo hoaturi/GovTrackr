@@ -17,14 +17,8 @@ public class
     {
         IQueryable<PresidentialActionTranslation> query = dbContext.PresidentialActionTranslations;
 
-        if (request.Category is not null && request.Category != string.Empty)
-            query = query.Where(a => a.PresidentialAction.SubCategory.Slug == request.Category);
-
-        if (request.FromDate.HasValue)
-            query = query.Where(a => a.PresidentialAction.PublishedAt >= request.FromDate.Value.ToUniversalTime());
-
-        if (request.ToDate.HasValue)
-            query = query.Where(a => a.PresidentialAction.PublishedAt <= request.ToDate.Value.ToUniversalTime());
+        if (request.CategoryId is not null)
+            query = query.Where(a => a.PresidentialAction.SubCategory.Id == request.CategoryId);
 
         var totalCount = await query.CountAsync(cancellationToken);
 

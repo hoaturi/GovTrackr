@@ -2,8 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovTrackr.Api", "src\GovTrackr.Api\GovTrackr.Api.csproj", "{122768D3-F03B-47F4-BCCD-9D0EFFA3E2FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovTrackr.Api.Tests", "src\GovTrackr.Api.Tests\GovTrackr.Api.Tests.csproj", "{30C612CB-0A70-42D6-9259-96CE7573D45C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovTrackr.AppHost", "src\GovTrackr.AppHost\GovTrackr.AppHost.csproj", "{215AA1EF-018F-46E6-946F-58C0962A5B0B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GovTrackr.ServiceDefaults", "src\GovTrackr.ServiceDefaults\GovTrackr.ServiceDefaults.csproj", "{0D9B451D-B957-4921-A7DC-07053F7D7F91}"
@@ -44,18 +42,6 @@ Global
 		{122768D3-F03B-47F4-BCCD-9D0EFFA3E2FE}.Release|x64.Build.0 = Release|Any CPU
 		{122768D3-F03B-47F4-BCCD-9D0EFFA3E2FE}.Release|x86.ActiveCfg = Release|Any CPU
 		{122768D3-F03B-47F4-BCCD-9D0EFFA3E2FE}.Release|x86.Build.0 = Release|Any CPU
-		{30C612CB-0A70-42D6-9259-96CE7573D45C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{30C612CB-0A70-42D6-9259-96CE7573D45C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{30C612CB-0A70-42D6-9259-96CE7573D45C}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{30C612CB-0A70-42D6-9259-96CE7573D45C}.Debug|x64.Build.0 = Debug|Any CPU
-		{30C612CB-0A70-42D6-9259-96CE7573D45C}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{30C612CB-0A70-42D6-9259-96CE7573D45C}.Debug|x86.Build.0 = Debug|Any CPU
-		{30C612CB-0A70-42D6-9259-96CE7573D45C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{30C612CB-0A70-42D6-9259-96CE7573D45C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{30C612CB-0A70-42D6-9259-96CE7573D45C}.Release|x64.ActiveCfg = Release|Any CPU
-		{30C612CB-0A70-42D6-9259-96CE7573D45C}.Release|x64.Build.0 = Release|Any CPU
-		{30C612CB-0A70-42D6-9259-96CE7573D45C}.Release|x86.ActiveCfg = Release|Any CPU
-		{30C612CB-0A70-42D6-9259-96CE7573D45C}.Release|x86.Build.0 = Release|Any CPU
 		{215AA1EF-018F-46E6-946F-58C0962A5B0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{215AA1EF-018F-46E6-946F-58C0962A5B0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{215AA1EF-018F-46E6-946F-58C0962A5B0B}.Debug|x64.ActiveCfg = Debug|Any CPU
