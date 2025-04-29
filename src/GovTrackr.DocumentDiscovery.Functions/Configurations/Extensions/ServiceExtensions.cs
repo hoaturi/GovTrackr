@@ -1,6 +1,5 @@
 ﻿using GovTrackr.DocumentDiscovery.Functions.Application.Interfaces;
 using GovTrackr.DocumentDiscovery.Functions.Configurations.Options;
-using GovTrackr.DocumentDiscovery.Functions.Functions;
 using GovTrackr.DocumentDiscovery.Functions.Infrastructure.Strategies;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -21,8 +20,7 @@ internal static class ServiceExtensions
             .AddDatabaseService()
             .AddMassTransitWithAzureServiceBus()
             .AddPlaywright()
-            .AddDiscoveryStrategies()
-            .AddDiscoveryService();
+            .AddDiscoveryStrategies();
 
         return services;
     }
@@ -68,13 +66,6 @@ internal static class ServiceExtensions
     private static IServiceCollection AddPlaywright(this IServiceCollection services)
     {
         services.AddSingleton<IBrowserService, PlaywrightService>();
-
-        return services;
-    }
-
-    private static IServiceCollection AddDiscoveryService(this IServiceCollection services)
-    {
-        services.AddScoped<IDocumentDiscoveryFunction, DocumentDocumentDiscoveryFunction>();
 
         return services;
     }

@@ -10,7 +10,7 @@ internal class DocumentDocumentDiscoveryFunction(
     IEnumerable<IDocumentDiscoveryStrategy> strategies,
     IPublishEndpoint publishEndpoint,
     ILogger<DocumentDocumentDiscoveryFunction> logger
-) : IDocumentDiscoveryFunction
+) 
 {
     [Function("DocumentDiscovery")]
     public async Task RunAsync(
